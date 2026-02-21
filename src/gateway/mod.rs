@@ -471,9 +471,17 @@ pub async fn run_gateway(host: &str, port: u16, config: Config) -> Result<()> {
             .map(Arc::from);
 
     // ── Pairing guard ──────────────────────────────────────
-    let pairing = Arc::new(PairingGuard::new(
+    let token_created_at: HashMap<String, u64> = config
+        .gateway
+        .paired_token_created_at
+        .iter()
+        .filter_map(|(k, &v)| u64::try_from(v).ok().map(|ts| (k.clone(), ts)))
+        .collect();
+    let pairing = Arc::new(PairingGuard::with_expiry(
         config.gateway.require_pairing,
         &config.gateway.paired_tokens,
+        config.gateway.paired_token_max_age_days,
+        &token_created_at,
     ));
     let rate_limit_max_keys = normalize_max_keys(
         config.gateway.rate_limit_max_keys,
@@ -699,10 +707,16 @@ async fn handle_pair(
 
 async fn persist_pairing_tokens(config: Arc<Mutex<Config>>, pairing: &PairingGuard) -> Result<()> {
     let paired_tokens = pairing.tokens();
+    let token_created_at: std::collections::BTreeMap<String, i64> = pairing
+        .token_created_at()
+        .into_iter()
+        .filter_map(|(k, v)| i64::try_from(v).ok().map(|ts| (k, ts)))
+        .collect();
     // This is needed because parking_lot's guard is not Send so we clone the inner
     // this should be removed once async mutexes are used everywhere
     let mut updated_cfg = { config.lock().clone() };
     updated_cfg.gateway.paired_tokens = paired_tokens;
+    updated_cfg.gateway.paired_token_created_at = token_created_at;
     updated_cfg
         .save()
         .await

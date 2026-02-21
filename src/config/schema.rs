@@ -682,6 +682,17 @@ pub struct GatewayConfig {
     #[serde(default)]
     pub paired_tokens: Vec<String>,
 
+    /// Optional maximum age for bearer tokens, in days.
+    /// Zero (default) means tokens never expire.
+    /// When set, tokens without a recorded creation time are not expired.
+    #[serde(default)]
+    pub paired_token_max_age_days: u64,
+
+    /// Creation timestamps (Unix seconds) for paired tokens, keyed by SHA-256 hash.
+    /// Managed automatically alongside `paired_tokens`; not user-edited.
+    #[serde(default)]
+    pub paired_token_created_at: std::collections::BTreeMap<String, i64>,
+
     /// Max `/pair` requests per minute per client key.
     #[serde(default = "default_pair_rate_limit")]
     pub pair_rate_limit_per_minute: u32,
@@ -748,6 +759,8 @@ impl Default for GatewayConfig {
             require_pairing: true,
             allow_public_bind: false,
             paired_tokens: Vec::new(),
+            paired_token_max_age_days: 0,
+            paired_token_created_at: std::collections::BTreeMap::new(),
             pair_rate_limit_per_minute: default_pair_rate_limit(),
             webhook_rate_limit_per_minute: default_webhook_rate_limit(),
             trust_forwarded_headers: false,
@@ -4814,6 +4827,8 @@ channel_id = "C123"
             require_pairing: true,
             allow_public_bind: false,
             paired_tokens: vec!["zc_test_token".into()],
+            paired_token_max_age_days: 0,
+            paired_token_created_at: std::collections::BTreeMap::new(),
             pair_rate_limit_per_minute: 12,
             webhook_rate_limit_per_minute: 80,
             trust_forwarded_headers: true,

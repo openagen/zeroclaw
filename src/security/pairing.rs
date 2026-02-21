@@ -20,6 +20,8 @@ const MAX_PAIR_ATTEMPTS: u32 = 5;
 const PAIR_LOCKOUT_SECS: u64 = 300; // 5 minutes
 /// Maximum number of tracked client entries to bound memory usage.
 const MAX_TRACKED_CLIENTS: usize = 1024;
+/// Seconds per day, used for max-age conversion.
+const SECS_PER_DAY: u64 = 86_400;
 
 /// Manages pairing state for the gateway.
 ///
@@ -37,10 +39,15 @@ pub struct PairingGuard {
     paired_tokens: Arc<Mutex<HashSet<String>>>,
     /// Brute-force protection: per-client failed attempt counter + lockout time.
     failed_attempts: Arc<Mutex<HashMap<String, (u32, Option<Instant>)>>>,
+    /// Unix-second creation timestamps keyed by token hash.
+    /// Used to enforce `max_age_secs`. Lock order: always acquire `paired_tokens` first.
+    token_created_at: Arc<Mutex<HashMap<String, u64>>>,
+    /// Maximum token lifetime in seconds; 0 = no expiry.
+    max_age_secs: u64,
 }
 
 impl PairingGuard {
-    /// Create a new pairing guard.
+    /// Create a new pairing guard with no token expiry.
     ///
     /// If `require_pairing` is true and no tokens exist yet, a fresh
     /// pairing code is generated and returned via `pairing_code()`.
@@ -69,6 +76,67 @@ impl PairingGuard {
             pairing_code: Arc::new(Mutex::new(code)),
             paired_tokens: Arc::new(Mutex::new(tokens)),
             failed_attempts: Arc::new(Mutex::new(HashMap::new())),
+            token_created_at: Arc::new(Mutex::new(HashMap::new())),
+            max_age_secs: 0,
+        }
+    }
+
+    /// Create a pairing guard with optional token expiry.
+    ///
+    /// `max_age_days` — maximum token lifetime in days; 0 = no expiry.
+    /// `token_created_at` — map of token hash → Unix-second creation timestamp,
+    ///   loaded from config. Tokens without an entry are never expired.
+    ///
+    /// Tokens that are already past `max_age_days` at construction time are
+    /// removed immediately (so `is_paired()` reflects the live count).
+    pub fn with_expiry(
+        require_pairing: bool,
+        existing_tokens: &[String],
+        max_age_days: u64,
+        token_created_at: &HashMap<String, u64>,
+    ) -> Self {
+        let max_age_secs = max_age_days.saturating_mul(SECS_PER_DAY);
+        let now = unix_now();
+
+        let mut tokens: HashSet<String> = existing_tokens
+            .iter()
+            .map(|t| {
+                if is_token_hash(t) {
+                    t.clone()
+                } else {
+                    hash_token(t)
+                }
+            })
+            .collect();
+
+        // Remove tokens that are already past their max age.
+        if max_age_secs > 0 {
+            tokens.retain(|hash| match token_created_at.get(hash) {
+                Some(&created) => now.saturating_sub(created) < max_age_secs,
+                None => true, // No creation record → treat as non-expiring (backward compat).
+            });
+        }
+
+        let code = if require_pairing && tokens.is_empty() {
+            Some(generate_code())
+        } else {
+            None
+        };
+
+        // Only retain timestamps for tokens still in the active set.
+        let active_created_at: HashMap<String, u64> = token_created_at
+            .iter()
+            .filter(|(hash, _)| tokens.contains(*hash))
+            .map(|(hash, &ts)| (hash.clone(), ts))
+            .collect();
+
+        Self {
+            require_pairing,
+            pairing_code: Arc::new(Mutex::new(code)),
+            paired_tokens: Arc::new(Mutex::new(tokens)),
+            failed_attempts: Arc::new(Mutex::new(HashMap::new())),
+            token_created_at: Arc::new(Mutex::new(active_created_at)),
+            max_age_secs,
         }
     }
 
@@ -106,8 +174,16 @@ impl PairingGuard {
                         attempts.remove(client_id);
                     }
                     let token = generate_token();
-                    let mut tokens = self.paired_tokens.lock();
-                    tokens.insert(hash_token(&token));
+                    let hash = hash_token(&token);
+                    {
+                        let mut tokens = self.paired_tokens.lock();
+                        tokens.insert(hash.clone());
+                    }
+                    {
+                        // Lock order: paired_tokens (released above) → token_created_at.
+                        let mut created_at = self.token_created_at.lock();
+                        created_at.insert(hash, unix_now());
+                    }
 
                     // Consume the pairing code so it cannot be reused
                     *pairing_code = None;
@@ -162,13 +238,44 @@ impl PairingGuard {
     }
 
     /// Check if a bearer token is valid (compares against stored hashes).
+    ///
+    /// Returns false if the token is unknown, or if `max_age_secs > 0` and
+    /// the token's recorded creation time shows it has expired.
     pub fn is_authenticated(&self, token: &str) -> bool {
         if !self.require_pairing {
             return true;
         }
         let hashed = hash_token(token);
         let tokens = self.paired_tokens.lock();
-        tokens.contains(&hashed)
+        if !tokens.contains(&hashed) {
+            return false;
+        }
+        if self.max_age_secs > 0 {
+            // Lock order: paired_tokens (already held) → token_created_at.
+            let created_at = self.token_created_at.lock();
+            if let Some(&created) = created_at.get(&hashed) {
+                if unix_now().saturating_sub(created) >= self.max_age_secs {
+                    return false;
+                }
+            }
+            // No creation record → treat as non-expiring (backward compat).
+        }
+        true
+    }
+
+    /// Get token creation timestamps (Unix seconds) keyed by token hash.
+    ///
+    /// Only returns entries for tokens currently in `paired_tokens`.
+    /// Used to persist timestamps alongside hashes so expiry survives restarts.
+    pub fn token_created_at(&self) -> HashMap<String, u64> {
+        // Lock order: paired_tokens → token_created_at.
+        let tokens = self.paired_tokens.lock();
+        let created_at = self.token_created_at.lock();
+        created_at
+            .iter()
+            .filter(|(hash, _)| tokens.contains(*hash))
+            .map(|(hash, &ts)| (hash.clone(), ts))
+            .collect()
     }
 
     /// Returns true if the gateway is already paired (has at least one token).
@@ -182,6 +289,14 @@ impl PairingGuard {
         let tokens = self.paired_tokens.lock();
         tokens.iter().cloned().collect()
     }
+}
+
+/// Returns the current time as Unix seconds (UTC).
+fn unix_now() -> u64 {
+    std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap_or_default()
+        .as_secs()
 }
 
 /// Generate a 6-digit numeric pairing code using cryptographically secure randomness.
@@ -516,6 +631,62 @@ mod tests {
             err >= PAIR_LOCKOUT_SECS - 1,
             "Remaining lockout should be ~{PAIR_LOCKOUT_SECS}s, got {err}s"
         );
+    }
+
+    // ── with_expiry ───────────────────────────────────────────
+
+    #[test]
+    async fn with_expiry_zero_max_age_retains_all_tokens() {
+        let existing = vec!["zc_a".into(), "zc_b".into()];
+        let guard = PairingGuard::with_expiry(true, &existing, 0, &HashMap::new());
+        assert!(guard.is_authenticated("zc_a"));
+        assert!(guard.is_authenticated("zc_b"));
+    }
+
+    #[test]
+    async fn with_expiry_removes_expired_tokens_on_load() {
+        let hash = hash_token("zc_stale");
+        // Token created 2 days ago with a 1-day max age → should be removed.
+        let created_at: HashMap<String, u64> =
+            [(hash.clone(), unix_now().saturating_sub(2 * SECS_PER_DAY))].into();
+        let guard = PairingGuard::with_expiry(true, &["zc_stale".into()], 1, &created_at);
+        assert!(!guard.is_authenticated("zc_stale"));
+        // All tokens removed → guard generates a new pairing code.
+        assert!(!guard.is_paired());
+        assert!(guard.pairing_code().is_some());
+    }
+
+    #[test]
+    async fn with_expiry_retains_fresh_tokens() {
+        let hash = hash_token("zc_fresh");
+        let created_at: HashMap<String, u64> = [(hash.clone(), unix_now())].into();
+        let guard = PairingGuard::with_expiry(true, &["zc_fresh".into()], 30, &created_at);
+        assert!(guard.is_authenticated("zc_fresh"));
+    }
+
+    #[test]
+    async fn with_expiry_token_without_creation_time_is_not_expired() {
+        // Backward compat: tokens loaded from old configs without a creation
+        // timestamp must never be expired regardless of max_age_days.
+        let guard = PairingGuard::with_expiry(true, &["zc_legacy".into()], 1, &HashMap::new());
+        assert!(guard.is_authenticated("zc_legacy"));
+    }
+
+    #[test]
+    async fn token_created_at_returns_only_active_entries() {
+        let hash = hash_token("zc_active");
+        let stale_hash = hash_token("zc_stale");
+        // stale_hash is in created_at but NOT in existing_tokens.
+        let created_at: HashMap<String, u64> = [
+            (hash.clone(), unix_now()),
+            (stale_hash.clone(), unix_now()),
+        ]
+        .into();
+        let guard =
+            PairingGuard::with_expiry(true, &["zc_active".into()], 30, &created_at);
+        let returned = guard.token_created_at();
+        assert!(returned.contains_key(&hash));
+        assert!(!returned.contains_key(&stale_hash));
     }
 
     #[test]

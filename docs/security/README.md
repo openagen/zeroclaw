@@ -2,6 +2,12 @@
 
 This section mixes current hardening guidance and proposal/roadmap documents.
 
+## Security Analysis Snapshots
+
+Point-in-time audits of the codebase security posture (immutable once superseded):
+
+- [Security Analysis 2026-02-21](../security-analysis-2026-02-21.md) — authentication, secrets, command sandboxing, network, supply chain
+
 ## Current-Behavior First
 
 For current runtime behavior, start here:
