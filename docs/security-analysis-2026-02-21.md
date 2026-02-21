@@ -237,23 +237,41 @@ Each is labeled by priority.
 **Gap:** Webhook handler verifies HMAC-SHA256 signatures but does not validate request
 timestamps. A captured request could be replayed within a short window.
 
-**Recommendation:** Add timestamp header validation (e.g., reject requests older than 5
-minutes) alongside existing signature verification. Common pattern: include epoch timestamp
-in signed payload and compare against `SystemTime::now()`.
+**Status by channel:**
 
-**Blast radius:** Limited to webhook-enabled channels; does not affect core agent logic.
+| Channel | Replay protection |
+|---------|-------------------|
+| Linq | **Implemented** — `X-Webhook-Timestamp` validated within 300 s (`src/channels/linq.rs`) |
+| Generic `/webhook` | Idempotency key (300 s TTL) mitigates replay for well-behaved senders |
+| WhatsApp | **Platform limitation** — Meta's `X-Hub-Signature-256` API does not include a timestamp header; no server-side fix possible |
+| Nextcloud Talk | `X-Nextcloud-Talk-Random` nonce included in signature; server-side seen-nonce store would be needed for full replay prevention |
 
-### 11.2 API Key / Token Expiration Tracking (MEDIUM)
+**Residual risk:** WhatsApp and Nextcloud Talk channels remain without timestamp-based replay
+protection. Mitigated by HMAC signature verification and rate limiting.
 
-**Gap:** Auth profiles store static tokens with no expiration metadata. A compromised
-token does not expire automatically.
+### 11.2 Bearer Token Expiration (MEDIUM) — **Addressed**
 
-**Recommendation:** Add optional `expires_at: Option<DateTime<Utc>>` field to auth profile
-schema, with a warning on token use past expiration. Provider-specific rotation hooks can
-be wired later.
+**Gap (original):** Gateway bearer tokens (from pairing) were stored as SHA-256 hashes
+with no expiration field. A compromised token would remain valid indefinitely.
 
-**Blast radius:** Config schema change; requires migration note and backward-compatible
-default (`None` = no expiration, current behavior preserved).
+**Implemented fix** (`src/security/pairing.rs`, `src/config/schema.rs`, `src/gateway/mod.rs`):
+
+- Added `paired_token_max_age_days: u64` to `GatewayConfig` (default `0` = unlimited,
+  backward-compatible).
+- Added `paired_token_created_at: BTreeMap<String, i64>` to `GatewayConfig` to persist
+  Unix-second creation timestamps alongside token hashes.
+- `PairingGuard::with_expiry()` constructor filters expired tokens on startup and rejects
+  them in `is_authenticated()` at runtime.
+- Tokens without a recorded creation time are never expired (backward compatibility for
+  configs that pre-date this change).
+- `persist_pairing_tokens()` now saves both hashes and creation timestamps so expiry
+  survives restarts.
+
+**Usage:** Set `paired_token_max_age_days = 90` in `[gateway]` to expire tokens after
+90 days. Value `0` preserves existing behavior (no expiry).
+
+**Blast radius:** Config schema addition only. Old configs load cleanly; no migration
+required.
 
 ### 11.3 Legacy XOR Cipher Removal Schedule (LOW)
 
