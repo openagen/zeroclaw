@@ -48,6 +48,7 @@ Last refreshed: **February 18, 2026**.
 ### 4) Security Design & Proposals
 
 - [security/README.md](security/README.md)
+- [security-analysis-2026-02-21.md](security-analysis-2026-02-21.md)
 - [agnostic-security.md](agnostic-security.md)
 - [frictionless-security.md](frictionless-security.md)
 - [sandboxing.md](sandboxing.md)
