@@ -5,5 +5,9 @@
 
 pub mod schema;
 pub mod storage;
+pub mod index;
+pub mod extract;
+pub mod describe;
 
 pub use schema::{FileRecord, FileMetadata};
+pub use index::FileIndex;
