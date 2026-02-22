@@ -4,7 +4,9 @@ use super::{
     MemoryBackendKind,
 };
 use crate::config::Config;
-use anyhow::{bail, Context, Result};
+use anyhow::{bail, Result};
+#[cfg(feature = "memory-postgres")]
+use anyhow::Context;
 use console::style;
 
 /// Handle `zeroclaw memory <subcommand>` CLI commands.
@@ -40,18 +42,31 @@ fn create_cli_memory(config: &Config) -> Result<Box<dyn Memory>> {
             bail!("Memory backend is 'none' (disabled). No entries to manage.");
         }
         MemoryBackendKind::Postgres => {
-            let sp = &config.storage.provider.config;
-            let db_url = sp
-                .db_url
-                .as_deref()
-                .map(str::trim)
-                .filter(|v| !v.is_empty())
-                .context(
-                    "memory backend 'postgres' requires db_url in [storage.provider.config]",
+            #[cfg(feature = "memory-postgres")]
+            {
+                let sp = &config.storage.provider.config;
+                let db_url = sp
+                    .db_url
+                    .as_deref()
+                    .map(str::trim)
+                    .filter(|v| !v.is_empty())
+                    .context(
+                        "memory backend 'postgres' requires db_url in [storage.provider.config]",
+                    )?;
+                let mem = super::PostgresMemory::new(
+                    db_url,
+                    &sp.schema,
+                    &sp.table,
+                    sp.connect_timeout_secs,
                 )?;
-            let mem =
-                super::PostgresMemory::new(db_url, &sp.schema, &sp.table, sp.connect_timeout_secs)?;
-            Ok(Box::new(mem))
+                Ok(Box::new(mem))
+            }
+            #[cfg(not(feature = "memory-postgres"))]
+            {
+                bail!(
+                    "memory backend 'postgres' requested but this build was compiled without `memory-postgres`; rebuild with `--features memory-postgres`"
+                );
+            }
         }
         _ => create_memory_for_migration(&backend, &config.workspace_dir),
     }

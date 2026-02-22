@@ -1083,7 +1083,7 @@ async fn execute_tools_parallel(
         })
         .collect();
 
-    let results = futures::future::join_all(futures).await;
+    let results = futures_util::future::join_all(futures).await;
     results.into_iter().collect()
 }
 
