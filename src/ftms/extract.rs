@@ -44,14 +44,14 @@ fn truncate_text(text: String) -> Option<String> {
 }
 
 fn extract_pdf(data: &[u8]) -> Result<Option<String>> {
-    #[cfg(feature = "pdf")]
+    #[cfg(feature = "rag-pdf")]
     {
         match pdf_extract::extract_text_from_mem(data) {
             Ok(text) => Ok(truncate_text(text)),
             _ => Ok(None),
         }
     }
-    #[cfg(not(feature = "pdf"))]
+    #[cfg(not(feature = "rag-pdf"))]
     {
         let _ = data;
         Ok(Some("[PDF document — enable pdf feature for text extraction]".to_string()))
