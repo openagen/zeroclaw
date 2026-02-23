@@ -7,6 +7,8 @@
 //! - Request timeouts (30s) to prevent slow-loris attacks
 //! - Header sanitization (handled by axum/hyper)
 
+mod openai_compat;
+
 use crate::channels::{Channel, LinqChannel, NextcloudTalkChannel, SendMessage, WhatsAppChannel};
 use crate::config::Config;
 use crate::memory::{self, Memory, MemoryCategory};
@@ -240,7 +242,7 @@ fn forwarded_client_ip(headers: &HeaderMap) -> Option<IpAddr> {
         .and_then(parse_client_ip)
 }
 
-fn client_key_from_request(
+pub(crate) fn client_key_from_request(
     peer_addr: Option<SocketAddr>,
     headers: &HeaderMap,
     trust_forwarded_headers: bool,
@@ -527,6 +529,8 @@ pub async fn run_gateway(host: &str, port: u16, config: Config) -> Result<()> {
     if nextcloud_talk_channel.is_some() {
         println!("  POST /nextcloud-talk — Nextcloud Talk bot webhook");
     }
+    println!("  POST /v1/chat/completions — OpenAI-compatible chat");
+    println!("  GET  /v1/models — list available models");
     println!("  GET  /health    — health check");
     println!("  GET  /metrics   — Prometheus metrics");
     if let Some(code) = pairing.pairing_code() {
@@ -570,7 +574,20 @@ pub async fn run_gateway(host: &str, port: u16, config: Config) -> Result<()> {
         observer,
     };
 
-    // Build router with middleware
+    // Build router with middleware.
+    //
+    // The OpenAI-compatible endpoints use a larger body limit (512KB) because
+    // chat histories can be much bigger than the default 64KB webhook limit.
+    // They get their own nested router with a separate body limit layer.
+    let openai_compat_routes = Router::new()
+        .route(
+            "/v1/chat/completions",
+            post(openai_compat::handle_v1_chat_completions),
+        )
+        .layer(RequestBodyLimitLayer::new(
+            openai_compat::CHAT_COMPLETIONS_MAX_BODY_SIZE,
+        ));
+
     let app = Router::new()
         .route("/health", get(handle_health))
         .route("/metrics", get(handle_metrics))
@@ -580,6 +597,8 @@ pub async fn run_gateway(host: &str, port: u16, config: Config) -> Result<()> {
         .route("/whatsapp", post(handle_whatsapp_message))
         .route("/linq", post(handle_linq_webhook))
         .route("/nextcloud-talk", post(handle_nextcloud_talk_webhook))
+        .route("/v1/models", get(openai_compat::handle_v1_models))
+        .merge(openai_compat_routes)
         .with_state(state)
         .layer(RequestBodyLimitLayer::new(MAX_BODY_SIZE))
         .layer(TimeoutLayer::with_status_code(
