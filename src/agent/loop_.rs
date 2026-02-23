@@ -3608,6 +3608,7 @@ Let me check the result."#;
             None, // no identity config
             None, // no bootstrap_max_chars
             true, // native_tools
+            crate::config::SkillsPromptInjectionMode::Full,
         );
 
         // Must contain zero XML protocol artifacts
