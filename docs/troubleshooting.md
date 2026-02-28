@@ -256,11 +256,8 @@ This may be environment-dependent — the same config running natively shows the
 
 **What to check:**
 
-- Ensure the API key is passed as an environment variable (not via `auth-profiles.json` from a native install, which won't work in Docker):
-  ```bash
-  docker run -e API_KEY=sk-... zeroclaw daemon
-  ```
 - Confirm `web_search.enabled = true` and `workspace_only = false` are set in your mounted `config.toml`
+- Confirm the API key is correctly passed via environment variable (e.g. `-e API_KEY=sk-...`)
 - Check container logs for silent startup errors: `docker logs <container>`
 
 If tools are still missing after a clean run with valid auth, please open a discussion — this may be a bug in how tools are registered in containerised environments.
