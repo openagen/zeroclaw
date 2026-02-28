@@ -245,3 +245,22 @@ Also include OS, install method, and sanitized config snippets (no secrets).
 - [one-click-bootstrap.md](one-click-bootstrap.md)
 - [channels-reference.md](channels-reference.md)
 - [network-deployment.md](network-deployment.md)
+
+## Docker Deployment
+
+### Tools not advertised to agent when running in Docker
+
+When running ZeroClaw inside a Docker container, some tool capabilities (e.g. `web_search_tool`) may not be surfaced to the agent, even with the relevant config flags enabled (e.g. `web_search.enabled = true`).
+
+This may be environment-dependent — the same config running natively shows the full tool set.
+
+**What to check:**
+
+- Ensure the API key is passed as an environment variable (not via `auth-profiles.json` from a native install, which won't work in Docker):
+  ```bash
+  docker run -e API_KEY=sk-... zeroclaw daemon
+  ```
+- Confirm `web_search.enabled = true` and `workspace_only = false` are set in your mounted `config.toml`
+- Check container logs for silent startup errors: `docker logs <container>`
+
+If tools are still missing after a clean run with valid auth, please open a discussion — this may be a bug in how tools are registered in containerised environments.
