@@ -17,9 +17,9 @@ pub async fn enhanced_recall(
     query: &str,
     limit: usize,
     session_id: Option<&str>,
-) -> Vec<MemoryEntry> {
+) -> anyhow::Result<Vec<MemoryEntry>> {
     // Primary recall with full query
-    let mut results = mem.recall(query, limit, session_id).await.unwrap_or_default();
+    let mut results = mem.recall(query, limit, session_id).await?;
 
     // Multi-query expansion for long messages
     if query.len() >= MIN_EXPANSION_LENGTH {
@@ -40,7 +40,7 @@ pub async fn enhanced_recall(
     });
     results.truncate(limit);
 
-    results
+    Ok(results)
 }
 
 /// Extract significant keywords (length >= 4) from a message.
@@ -140,32 +140,53 @@ mod tests {
     struct MockMemory {
         primary: Vec<MemoryEntry>,
         keyword: Vec<MemoryEntry>,
+        fail_primary: bool,
+        fail_keyword: bool,
         call_count: std::sync::atomic::AtomicUsize,
     }
 
     #[async_trait]
     impl Memory for MockMemory {
         async fn store(
-            &self, _k: &str, _c: &str, _cat: MemoryCategory, _s: Option<&str>,
+            &self,
+            _k: &str,
+            _c: &str,
+            _cat: MemoryCategory,
+            _s: Option<&str>,
         ) -> anyhow::Result<()> {
             Ok(())
         }
         async fn recall(
-            &self, _query: &str, _limit: usize, _s: Option<&str>,
+            &self,
+            _query: &str,
+            _limit: usize,
+            _s: Option<&str>,
         ) -> anyhow::Result<Vec<MemoryEntry>> {
             // First call returns primary results, second call returns keyword results
-            let n = self.call_count.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+            let n = self
+                .call_count
+                .fetch_add(1, std::sync::atomic::Ordering::SeqCst);
             if n == 0 {
-                Ok(self.primary.clone())
+                if self.fail_primary {
+                    Err(anyhow::anyhow!("primary recall failed"))
+                } else {
+                    Ok(self.primary.clone())
+                }
             } else {
-                Ok(self.keyword.clone())
+                if self.fail_keyword {
+                    Err(anyhow::anyhow!("keyword recall failed"))
+                } else {
+                    Ok(self.keyword.clone())
+                }
             }
         }
         async fn get(&self, _k: &str) -> anyhow::Result<Option<MemoryEntry>> {
             Ok(None)
         }
         async fn list(
-            &self, _c: Option<&MemoryCategory>, _s: Option<&str>,
+            &self,
+            _c: Option<&MemoryCategory>,
+            _s: Option<&str>,
         ) -> anyhow::Result<Vec<MemoryEntry>> {
             Ok(vec![])
         }
@@ -204,12 +225,14 @@ mod tests {
                 session_id: None,
                 score: Some(0.6),
             }],
+            fail_primary: false,
+            fail_keyword: false,
             call_count: std::sync::atomic::AtomicUsize::new(0),
         };
 
         // Long query triggers expansion
         let query = "what database and programming language should we use for this project";
-        let results = enhanced_recall(&mem, query, 5, None).await;
+        let results = enhanced_recall(&mem, query, 5, None).await.unwrap();
 
         assert_eq!(results.len(), 2);
         // "db" has higher score (0.7), ranked first
@@ -241,12 +264,14 @@ mod tests {
                 session_id: None,
                 score: Some(0.6),
             }],
+            fail_primary: false,
+            fail_keyword: false,
             call_count: std::sync::atomic::AtomicUsize::new(0),
         };
 
         // Short query — no expansion, so "keyword" recall is what gets returned
         // (because our mock returns keyword results for short queries)
-        let results = enhanced_recall(&mem, "database?", 5, None).await;
+        let results = enhanced_recall(&mem, "database?", 5, None).await.unwrap();
 
         // Only keyword results returned (mock behavior), no merge
         assert_eq!(results.len(), 1);
@@ -267,6 +292,8 @@ mod tests {
                 })
                 .collect(),
             keyword: vec![],
+            fail_primary: false,
+            fail_keyword: false,
             call_count: std::sync::atomic::AtomicUsize::new(0),
         };
 
@@ -276,8 +303,56 @@ mod tests {
             3,
             None,
         )
-        .await;
+        .await
+        .unwrap();
 
         assert_eq!(results.len(), 3);
+    }
+
+    #[tokio::test]
+    async fn enhanced_recall_propagates_primary_recall_errors() {
+        let mem = MockMemory {
+            primary: vec![],
+            keyword: vec![],
+            fail_primary: true,
+            fail_keyword: false,
+            call_count: std::sync::atomic::AtomicUsize::new(0),
+        };
+
+        let err = enhanced_recall(&mem, "long enough query to trigger expansion", 5, None)
+            .await
+            .expect_err("expected primary recall error to propagate");
+        assert!(err.to_string().contains("primary recall failed"));
+    }
+
+    #[tokio::test]
+    async fn enhanced_recall_tolerates_keyword_recall_errors() {
+        let mem = MockMemory {
+            primary: vec![MemoryEntry {
+                id: "1".into(),
+                key: "db".into(),
+                content: "PostgreSQL".into(),
+                category: MemoryCategory::Core,
+                timestamp: "now".into(),
+                session_id: None,
+                score: Some(0.7),
+            }],
+            keyword: vec![],
+            fail_primary: false,
+            fail_keyword: true,
+            call_count: std::sync::atomic::AtomicUsize::new(0),
+        };
+
+        let results = enhanced_recall(
+            &mem,
+            "what database and programming language should we use for this project",
+            5,
+            None,
+        )
+        .await
+        .unwrap();
+
+        assert_eq!(results.len(), 1);
+        assert_eq!(results[0].key, "db");
     }
 }
