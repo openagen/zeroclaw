@@ -789,9 +789,10 @@ impl Tool for ComposioTool {
                             if let Some(app_name) = app {
                                 self.cache_connected_account(app_name, entity_id, connected_account_id);
                             }
-                            output.push_str(&format!(
-                                "\nConnected account ID: {connected_account_id}"
-                            ));
+                            {
+                                use std::fmt::Write as _;
+                                let _ = write!(output, "\nConnected account ID: {connected_account_id}");
+                            }
                         }
                         Ok(ToolResult {
                             success: true,
@@ -1573,7 +1574,7 @@ mod tests {
     fn resolve_picks_first_usable_when_multiple_accounts_exist() {
         // Regression test for issue #959: previously returned None when
         // multiple accounts existed, causing the LLM to loop on the OAuth URL.
-        let tool = ComposioTool::new("test-key", None, test_security());
+        let _tool = ComposioTool::new("test-key", None, test_security());
         let accounts = vec![
             ComposioConnectedAccount {
                 id: "ca_old".to_string(),

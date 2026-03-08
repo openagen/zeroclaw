@@ -36,6 +36,7 @@ pub struct PairingGuard {
     /// Set of SHA-256 hashed bearer tokens (persisted across restarts).
     paired_tokens: Arc<Mutex<HashSet<String>>>,
     /// Brute-force protection: per-client failed attempt counter + lockout time.
+    #[allow(clippy::type_complexity)]
     failed_attempts: Arc<Mutex<HashMap<String, (u32, Option<Instant>)>>>,
 }
 

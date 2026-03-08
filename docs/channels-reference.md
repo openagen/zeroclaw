@@ -218,8 +218,8 @@ ignore_stories = true
 
 ZeroClaw supports two WhatsApp backends:
 
-- **Cloud API mode** (`phone_number_id` + `access_token` + `verify_token`)
-- **WhatsApp Web mode** (`session_path`, requires build flag `--features whatsapp-web`)
+- **Cloud API mode** (`phone_number_id` + `access_token` + `verify_token`) — stable, uses the official Meta Cloud API.
+- **WhatsApp Web mode** (`session_path`, requires build flag `--features whatsapp-web`) — **experimental, see security warning below**.
 
 Cloud API mode:
 
@@ -242,9 +242,26 @@ pair_code = ""                     # optional custom pair code
 allowed_numbers = ["*"]
 ```
 
+> **Security warning — WhatsApp Web mode (`--features whatsapp-web`)**
+>
+> WhatsApp Web mode uses the `wa-rs` library, which reverse-engineers the
+> WhatsApp Web protocol. This approach carries risks that do not apply to the
+> Cloud API mode:
+>
+> - **Unofficial API:** The protocol is not documented or supported by Meta.
+>   It can break without notice on any WhatsApp update.
+> - **Account risk:** Meta may suspend accounts detected using unofficial clients.
+> - **Unpredictable attack surface:** Protocol changes or undocumented behaviors
+>   can introduce security regressions that are hard to audit or anticipate.
+> - **Recommended only for:** controlled, non-production environments where the
+>   Cloud API is unavailable and account suspension is acceptable.
+>
+> For production deployments, the Cloud API mode is strongly preferred.
+
 Notes:
 
 - Build with `cargo build --features whatsapp-web` (or equivalent run command).
+  The feature is disabled by default. Prefer Cloud API mode in production.
 - Keep `session_path` on persistent storage to avoid relinking after restart.
 - Reply routing uses the originating chat JID, so direct and group replies work correctly.
 

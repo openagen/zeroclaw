@@ -279,6 +279,7 @@ async fn normalize_remote_image(
     }
 
     if let Some(content_length) = response.content_length() {
+        #[allow(clippy::cast_possible_truncation)]
         let content_length = content_length as usize;
         validate_size(source, content_length, max_bytes)?;
     }
@@ -328,6 +329,7 @@ async fn normalize_local_image(source: &str, max_bytes: usize) -> anyhow::Result
                 reason: error.to_string(),
             })?;
 
+    #[allow(clippy::cast_possible_truncation)]
     validate_size(source, metadata.len() as usize, max_bytes)?;
 
     let bytes = tokio::fs::read(path)
@@ -364,10 +366,7 @@ fn validate_size(source: &str, size_bytes: usize, max_bytes: usize) -> anyhow::R
 }
 
 fn validate_mime(source: &str, mime: &str) -> anyhow::Result<()> {
-    if ALLOWED_IMAGE_MIME_TYPES
-        .iter()
-        .any(|allowed| *allowed == mime)
-    {
+    if ALLOWED_IMAGE_MIME_TYPES.contains(&mime) {
         return Ok(());
     }
 

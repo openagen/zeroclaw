@@ -424,6 +424,12 @@ Examples:
         #[arg(long)]
         host: Option<String>,
     },
+    /// Deploy ZeroClaw binary + config to Arduino Uno Q (cross-compiled aarch64)
+    DeployUnoQ {
+        /// Uno Q IP or user@host (e.g. 192.168.0.48 or arduino@192.168.0.48)
+        #[arg(long)]
+        host: String,
+    },
     /// Flash ZeroClaw firmware to Nucleo-F401RE (builds + probe-rs run)
     FlashNucleo,
 }

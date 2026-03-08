@@ -5,8 +5,8 @@
 <h1 align="center">ZeroClaw 🦀</h1>
 
 <p align="center">
-  <strong>Zero overhead. Zero compromise. 100% Rust. 100% Agnostic.</strong><br>
-  ⚡️ <strong>Runs on $10 hardware with <5MB RAM: That's 99% less memory than OpenClaw and 98% cheaper than a Mac mini!</strong>
+  <strong>Zero overhead. Zero compromise. 100% Rust. 100% Agnóstico.</strong><br>
+  ⚡️ <strong>Roda em hardware de $10 com <5MB de RAM: Isso é 99% menos memória que o OpenClaw e 98% mais barato que um Mac mini!</strong>
 </p>
 
 <p align="center">
@@ -20,82 +20,79 @@
   <a href="https://t.me/zeroclawlabs_ru"><img src="https://img.shields.io/badge/Telegram%20RU-%40zeroclawlabs__ru-26A5E4?style=flat&logo=telegram&logoColor=white" alt="Telegram RU: @zeroclawlabs_ru" /></a>
   <a href="https://www.reddit.com/r/zeroclawlabs/"><img src="https://img.shields.io/badge/Reddit-r%2Fzeroclawlabs-FF4500?style=flat&logo=reddit&logoColor=white" alt="Reddit: r/zeroclawlabs" /></a>
 </p>
+
 <p align="center">
-Built by students and members of the Harvard, MIT, and Sundai.Club communities.
+Construído por estudantes e membros das comunidades Harvard, MIT e Sundai.Club.
 </p>
 
 <p align="center">
-  🌐 <strong>Languages:</strong> <a href="README.md">English</a> · <a href="README.zh-CN.md">简体中文</a> · <a href="README.ja.md">日本語</a> · <a href="README.ru.md">Русский</a> · <a href="README.fr.md">Français</a> · <a href="README.vi.md">Tiếng Việt</a> · <a href="README.pt-br.md">Português (Brasil)</a>
+  🌐 <strong>Idiomas:</strong> <a href="README.md">Inglês</a> · <a href="README.zh-CN.md">简体中文</a> · <a href="README.ja.md">日本語</a> · <a href="README.ru.md">Русский</a> · <a href="README.fr.md">Français</a> · <a href="README.vi.md">Tiếng Việt</a> · <a href="README.pt-br.md">Português do Brasil</a>
 </p>
 
 <p align="center">
-  <a href="#quick-start">Getting Started</a> |
-  <a href="bootstrap.sh">One-Click Setup</a> |
-  <a href="docs/README.md">Docs Hub</a> |
-  <a href="docs/SUMMARY.md">Docs TOC</a>
+  <a href="#quick-start">Primeiros Passos</a> |
+  <a href="bootstrap.sh">Configuração com um clique</a> |
+  <a href="docs/README.md">Hub de Documentação</a> |
+  <a href="docs/SUMMARY.md">Sumário da Documentação</a>
 </p>
 
 <p align="center">
-  <strong>Quick Routes:</strong>
-  <a href="docs/reference/README.md">Reference</a> ·
-  <a href="docs/operations/README.md">Operations</a> ·
-  <a href="docs/troubleshooting.md">Troubleshoot</a> ·
-  <a href="docs/security/README.md">Security</a> ·
+  <strong>Rotas rápidas:</strong>
+  <a href="docs/reference/README.md">Referência</a> ·
+  <a href="docs/operations/README.md">Operações</a> ·
+  <a href="docs/troubleshooting.md">Solução de problemas</a> ·
+  <a href="docs/security/README.md">Segurança</a> ·
   <a href="docs/hardware/README.md">Hardware</a> ·
-  <a href="docs/contributing/README.md">Contribute</a>
+  <a href="docs/contributing/README.md">Contribuir</a>
 </p>
 
 <p align="center">
-  <strong>Fast, small, and fully autonomous AI assistant infrastructure</strong><br />
-  Deploy anywhere. Swap anything.
+  <strong>Infraestrutura de assistente de AI rápida, leve e totalmente autônoma</strong><br />
+  Implante em qualquer lugar. Troque qualquer componente.
 </p>
 
-<p align="center"><code>Trait-driven architecture · secure-by-default runtime · provider/channel/tool swappable · pluggable everything</code></p>
+<p align="center"><code>Arquitetura orientada a traits · runtime seguro por padrão · provider/canal/ferramentas intercambiáveis · tudo plugável</code></p>
 
-### 📢 Announcements
+### 📢 Anúncios
 
-Use this board for important notices (breaking changes, security advisories, maintenance windows, and release blockers).
+Use este quadro para avisos importantes (breaking changes, avisos de segurança, janelas de manutenção e bloqueadores de release).
 
-| Date (UTC) | Level | Notice | Action |
+| Data (UTC) | Nível | Aviso | Ação |
 |---|---|---|---|
-| 2026-02-19 | _Important_ | We have **not** launched an official website yet, and we are seeing impersonation attempts. Do **not** join any investment or fundraising activity claiming the ZeroClaw name. | Use this repository as the single source of truth. Follow [X (@zeroclawlabs)](https://x.com/zeroclawlabs?s=21), [Reddit (r/zeroclawlabs)](https://www.reddit.com/r/zeroclawlabs/), [Telegram (@zeroclawlabs)](https://t.me/zeroclawlabs), [Telegram CN (@zeroclawlabs_cn)](https://t.me/zeroclawlabs_cn), [Telegram RU (@zeroclawlabs_ru)](https://t.me/zeroclawlabs_ru), and [Xiaohongshu](https://www.xiaohongshu.com/user/profile/67cbfc43000000000d008307?xsec_token=AB73VnYnGNx5y36EtnnZfGmAmS-6Wzv8WMuGpfwfkg6Yc%3D&xsec_source=pc_search) for official updates. |
-| 2026-02-19 | _Important_ | Anthropic updated the Authentication and Credential Use terms on 2026-02-19. OAuth authentication (Free, Pro, Max) is intended exclusively for Claude Code and Claude.ai; using OAuth tokens from Claude Free/Pro/Max in any other product, tool, or service (including Agent SDK) is not permitted and may violate the Consumer Terms of Service. | Please temporarily avoid Claude Code OAuth integrations to prevent potential loss. Original clause: [Authentication and Credential Use](https://code.claude.com/docs/en/legal-and-compliance#authentication-and-credential-use). |
+| 2026-02-19 | _Importante_ | Ainda **não** lançamos um site oficial e estamos vendo tentativas de impersonação. **Não** participe de investimentos ou arrecadações usando o nome ZeroClaw. | Use este repositório como fonte única da verdade. Siga os canais oficiais para atualizações. |
+| 2026-02-19 | _Importante_ | A Anthropic atualizou os termos de autenticação em 2026-02-19. OAuth é exclusivo para Claude Code e Claude.ai; usar tokens em outros produtos pode violar os termos. | Evite temporariamente integrações OAuth do Claude Code para prevenir perda de acesso. |
 
 ### ✨ Features
 
-- 🏎️ **Lean Runtime by Default:** Common CLI and status workflows run in a few-megabyte memory envelope on release builds.
-- 💰 **Cost-Efficient Deployment:** Designed for low-cost boards and small cloud instances without heavyweight runtime dependencies.
-- ⚡ **Fast Cold Starts:** Single-binary Rust runtime keeps command and daemon startup near-instant for daily operations.
-- 🌍 **Portable Architecture:** One binary-first workflow across ARM, x86, and RISC-V with swappable providers/channels/tools.
+- 🏎️ **Lean Runtime by Default:** Common CLI e status workflows executam dentro de um limite de memória de alguns megabytes em builds de release.
+- 💰 **Cost-Efficient Deployment:** Projetado para low-cost boards e pequenas instâncias na nuvem, sem dependências pesadas de runtime.
+- ⚡ **Fast Cold Starts:** Runtime em Rust de binário único mantém a inicialização de comandos e do daemon praticamente instantânea para as operações do dia a dia.
+- 🌍 **Portable Architecture:** Um fluxo de trabalho centrado em binário único, compatível com ARM, x86 e RISC-V, com providers/canais/ferramentas intercambiáveis.
 
-### Why teams pick ZeroClaw
+### Por que times escolhem ZeroClaw
 
-- **Lean by default:** small Rust binary, fast startup, low memory footprint.
-- **Secure by design:** pairing, strict sandboxing, explicit allowlists, workspace scoping.
-- **Fully swappable:** core systems are traits (providers, channels, tools, memory, tunnels).
-- **No lock-in:** OpenAI-compatible provider support + pluggable custom endpoints.
+- **Lean by default:** Binário Rust pequeno, inicialização rápida e baixo consumo de memória.
+- **Secure by design:** Pareamento, sandbox rigoroso, listas de permissão explícitas, escopo restrito ao workspace.
+- **Fully swappable:** Os sistemas centrais são definidos como traits (providers, canais, ferramentas, memória e túneis).
+- **No lock-in:** Suporte a provedores compatíveis com a API da OpenAI + endpoints personalizados plugáveis.
 
-## Benchmark Snapshot (ZeroClaw vs OpenClaw, Reproducible)
+## Snapshot de Benchmark (ZeroClaw vs OpenClaw, reproduzível)
 
-Local machine quick benchmark (macOS arm64, Feb 2026) normalized for 0.8GHz edge hardware.
+Benchmark local (macOS arm64, fev 2026) normalizado para hardware edge 0.8GHz.
 
 | | OpenClaw | NanoBot | PicoClaw | ZeroClaw 🦀 |
 |---|---|---|---|---|
-| **Language** | TypeScript | Python | Go | **Rust** |
+| **Linguagem** | TypeScript | Python | Go | **Rust** |
 | **RAM** | > 1GB | > 100MB | < 10MB | **< 5MB** |
-| **Startup (0.8GHz core)** | > 500s | > 30s | < 1s | **< 10ms** |
-| **Binary Size** | ~28MB (dist) | N/A (Scripts) | ~8MB | **~8.8 MB** |
-| **Cost** | Mac Mini $599 | Linux SBC ~$50 | Linux Board $10 | **Any hardware $10** |
+| **Startup (0.8GHz)** | > 500s | > 30s | < 1s | **< 10ms** |
+| **Tamanho** | ~28MB | N/A | ~8MB | **~8.8 MB** |
+| **Custo** | Mac Mini $599 | SBC ~$50 | Board $10 | **Qualquer hardware $10** |
 
-> Notes: ZeroClaw results are measured on release builds using `/usr/bin/time -l`. OpenClaw requires Node.js runtime (typically ~390MB additional memory overhead), while NanoBot requires Python runtime. PicoClaw and ZeroClaw are static binaries. The RAM figures above are runtime memory; build-time compilation requirements are higher.
+> Observações: Os resultados do ZeroClaw são medidos em builds de release usando `/usr/bin/time -l`. O OpenClaw requer runtime do Node.js (normalmente ~390 MB adicionais de uso de memória), enquanto o NanoBot requer runtime do Python. PicoClaw e ZeroClaw são binários estáticos. Os valores de RAM acima referem-se à memória em tempo de execução; os requisitos de compilação em tempo de build são mais altos.
 
-<p align="center">
-  <img src="zero-claw.jpeg" alt="ZeroClaw vs OpenClaw Comparison" width="800" />
-</p>
+### Medição local reprodutível
 
-### Reproducible local measurement
-
-Benchmark claims can drift as code and toolchains evolve, so always measure your current build locally:
+As medições de benchmark podem variar à medida que o código e as toolchains evoluem, portanto, sempre meça sua build atual localmente:
 
 ```bash
 cargo build --release
@@ -105,13 +102,13 @@ ls -lh target/release/zeroclaw
 /usr/bin/time -l target/release/zeroclaw status
 ```
 
-Example sample (macOS arm64, measured on February 18, 2026):
+Exemplo de amostra (macOS arm64, medido em 18 de fevereiro de 2026):
 
-- Release binary size: `8.8M`
+- Tamanho do binário de release: `8.8M`
 - `zeroclaw --help`: about `0.02s` real time, ~`3.9MB` peak memory footprint
 - `zeroclaw status`: about `0.01s` real time, ~`4.1MB` peak memory footprint
 
-## Prerequisites
+## Pré-requisitos
 
 <details>
 <summary><strong>Windows</strong></summary>
@@ -122,23 +119,23 @@ Example sample (macOS arm64, measured on February 18, 2026):
    ```powershell
    winget install Microsoft.VisualStudio.2022.BuildTools
    ```
-   During installation (or via the Visual Studio Installer), select the **"Desktop development with C++"** workload.
+   Durante a instalação (ou pelo Visual Studio Installer), selecione a carga de trabalho "Desenvolvimento para desktop com C++".
 
 2. **Rust toolchain:**
    ```powershell
    winget install Rustlang.Rustup
    ```
-   After installation, open a new terminal and run `rustup default stable` to ensure the stable toolchain is active.
+   Após a instalação, abra um novo terminal e execute `rustup default stable` para garantir que a toolchain estável esteja ativa.
 
-3. **Verify** both are working:
+3. **Verify** Ambos estão funcionando.:
    ```powershell
    rustc --version
    cargo --version
    ```
 
-#### Optional
+#### Opcional
 
-- **Docker Desktop** — required only if using the [Docker sandboxed runtime](#runtime-support-current) (`runtime.kind = "docker"`). Install via `winget install Docker.DockerDesktop`.
+- **Docker Desktop** — necessário apenas se for usar o [Docker sandboxed runtime](#runtime-support-current) (`runtime.kind = "docker"`). Instale via `winget install Docker.DockerDesktop`.
 
 </details>
 
@@ -147,7 +144,7 @@ Example sample (macOS arm64, measured on February 18, 2026):
 
 #### Required
 
-1. **Build essentials:**
+1. **Essenciais para compilação:**
    - **Linux (Debian/Ubuntu):** `sudo apt install build-essential pkg-config`
    - **Linux (Fedora/RHEL):** `sudo dnf group install development-tools && sudo dnf install pkg-config`
    - **macOS:** Install Xcode Command Line Tools: `xcode-select --install`
@@ -156,48 +153,48 @@ Example sample (macOS arm64, measured on February 18, 2026):
    ```bash
    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
    ```
-   See [rustup.rs](https://rustup.rs) for details.
+   Consulte [rustup.rs](https://rustup.rs) para mais detalhes.
 
-3. **Verify** both are working:
+3. **Verify** ambos funcionam:
    ```bash
    rustc --version
    cargo --version
    ```
 
-#### One-Line Installer
+#### Instalador em uma linha
 
-Or skip the steps above and install everything (system deps, Rust, ZeroClaw) in a single command:
+Ou pule os passos acima e instale tudo (dependências do sistema, Rust e ZeroClaw) em um único comando:
 
 ```bash
 curl -LsSf https://raw.githubusercontent.com/openagen/zeroclaw/main/scripts/install.sh | bash
 ```
 
-#### Compilation resource requirements
+#### Requisitos de recursos para compilação
 
-Building from source needs more resources than running the resulting binary:
+Compilar a partir do código-fonte exige mais recursos do que executar o binário gerado:
 
 | Resource | Minimum | Recommended |
 |---|---|---|
 | **RAM + swap** | 2 GB | 4 GB+ |
 | **Free disk** | 6 GB | 10 GB+ |
 
-If your host is below the minimum, use pre-built binaries:
+Se o seu host estiver abaixo do mínimo, use binários pré-compilados:
 
 ```bash
 ./bootstrap.sh --prefer-prebuilt
 ```
 
-To require binary-only install with no source fallback:
+Para exigir instalação apenas via binário, sem fallback para código-fonte:
 
 ```bash
 ./bootstrap.sh --prebuilt-only
 ```
 
-#### Optional
+#### Opcional
 
-- **Docker** — required only if using the [Docker sandboxed runtime](#runtime-support-current) (`runtime.kind = "docker"`). Install via your package manager or [docker.com](https://docs.docker.com/engine/install/).
+- **Docker** — Necessário apenas se estiver usando [Docker sandboxed runtime](#runtime-support-current) (`runtime.kind = "docker"`). Instale via seu gerenciador de pacotes ou [docker.com](https://docs.docker.com/engine/install/).
 
-> **Note:** The default `cargo build --release` uses `codegen-units=1` to lower peak compile pressure. For faster builds on powerful machines, use `cargo build --profile release-fast`.
+> **Note:** O default `cargo build --release` usa `codegen-units=1` para reduzir a pressão máxima de compilação. Para builds mais rápidos em máquinas potentes, use `cargo build --profile release-fast`.
 
 </details>
 
@@ -240,26 +237,26 @@ ZEROCLAW_CONTAINER_CLI=podman ./bootstrap.sh --docker
 ./bootstrap.sh --docker --skip-build
 ```
 
-Remote one-liner (review first in security-sensitive environments):
+Linha única remota (revise antes em ambientes sensíveis à segurança):
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/openagen/zeroclaw/main/scripts/bootstrap.sh | bash
 ```
 
-Details: [`docs/one-click-bootstrap.md`](docs/one-click-bootstrap.md) (toolchain mode may request `sudo` for system packages).
+Detalhes: [`docs/one-click-bootstrap.md`](docs/one-click-bootstrap.md) (o modo toolchain pode solicitar `sudo` para pacotes do sistema).
 
 ### Pre-built binaries
 
-Release assets are published for:
+Os assets de release são publicados para:
 
 - Linux: `x86_64`, `aarch64`, `armv7`
 - macOS: `x86_64`, `aarch64`
 - Windows: `x86_64`
 
-Download the latest assets from:
+Baixe os assets mais recentes em:
 <https://github.com/openagen/zeroclaw/releases/latest>
 
-Example (ARM64 Linux):
+Exemplo (ARM64 Linux):
 
 ```bash
 curl -fsSLO https://github.com/openagen/zeroclaw/releases/latest/download/zeroclaw-aarch64-unknown-linux-gnu.tar.gz
@@ -338,9 +335,9 @@ zeroclaw migrate openclaw
 
 > **Dev fallback (no global install):** prefix commands with `cargo run --release --` (example: `cargo run --release -- status`).
 
-## Subscription Auth (OpenAI Codex / Claude Code)
+## Assinatura Auth (OpenAI Codex / Claude Code)
 
-ZeroClaw now supports subscription-native auth profiles (multi-account, encrypted at rest).
+O ZeroClaw agora suporta perfis de autenticação nativos por assinatura (multi-account, encrypted at rest).
 
 - Store file: `~/.zeroclaw/auth-profiles.json`
 - Encryption key: `~/.zeroclaw/.secret_key`
@@ -372,7 +369,7 @@ zeroclaw auth paste-token --provider anthropic --profile default --auth-kind aut
 zeroclaw auth setup-token --provider anthropic --profile default
 ```
 
-Run the agent with subscription auth:
+Execute o agente usando autenticação por assinatura:
 
 ```bash
 zeroclaw agent --provider openai-codex -m "hello"
@@ -383,9 +380,9 @@ zeroclaw agent --provider openai-codex --auth-profile openai-codex:work -m "hell
 zeroclaw agent --provider anthropic -m "hello"
 ```
 
-## Architecture
+## Arquitetura
 
-Every subsystem is a **trait** — swap implementations with a config change, zero code changes.
+Cada subsistema é um **trait** — troque implementações apenas com uma alteração de configuração, sem nenhuma mudança de código.
 
 <p align="center">
   <img src="docs/architecture.svg" alt="ZeroClaw Architecture" width="900" />
@@ -408,14 +405,14 @@ Every subsystem is a **trait** — swap implementations with a config change, ze
 
 ### Runtime support (current)
 
-- ✅ Supported today: `runtime.kind = "native"` or `runtime.kind = "docker"`
-- 🚧 Planned, not implemented yet: WASM / edge runtimes
+- ✅ Suportado hoje: `runtime.kind = "native"` or `runtime.kind = "docker"`
+- 🚧 Planejado, ainda não implementado: WASM / edge runtimes
 
-When an unsupported `runtime.kind` is configured, ZeroClaw now exits with a clear error instead of silently falling back to native.
+Quando um `runtime.kind` não suportado é configurado, o ZeroClaw agora encerra com um erro claro em vez de voltar silenciosamente para o modo nativo.
 
 ### Memory System (Full-Stack Search Engine)
 
-All custom, zero external dependencies — no Pinecone, no Elasticsearch, no LangChain:
+Totalmente personalizado, zero dependências externas — sem Pinecone, sem Elasticsearch, sem LangChain:
 
 | Layer | Implementation |
 |-------|---------------|
@@ -427,7 +424,7 @@ All custom, zero external dependencies — no Pinecone, no Elasticsearch, no Lan
 | **Caching** | SQLite `embedding_cache` table with LRU eviction |
 | **Safe Reindex** | Rebuild FTS5 + re-embed missing vectors atomically |
 
-The agent automatically recalls, saves, and manages memory via tools.
+O agente automaticamente recupera, salva e gerencia a memória por meio de ferramentas.
 
 ```toml
 [memory]
@@ -464,7 +461,7 @@ keyword_weight = 0.3
 
 ## Security
 
-ZeroClaw enforces security at **every layer** — not just the sandbox. It passes all items from the community security checklist.
+O ZeroClaw impõe segurança em **todas as camadas** — não apenas no sandbox. Ele atende a todos os itens da lista de verificação de segurança da comunidade.
 
 ### Security Checklist
 
@@ -475,19 +472,19 @@ ZeroClaw enforces security at **every layer** — not just the sandbox. It passe
 | 3 | **Filesystem scoped (no /)** | ✅ | `workspace_only = true` by default. 14 system dirs + 4 sensitive dotfiles blocked. Null byte injection blocked. Symlink escape detection via canonicalization + resolved-path workspace checks in file read/write tools. |
 | 4 | **Access via tunnel only** | ✅ | Gateway refuses public bind without active tunnel. Supports Tailscale, Cloudflare, ngrok, or any custom tunnel. |
 
-> **Run your own nmap:** `nmap -p 1-65535 <your-host>` — ZeroClaw binds to localhost only, so nothing is exposed unless you explicitly configure a tunnel.
+> **Run your own nmap:** `nmap -p 1-65535 <your-host>` — O ZeroClaw se vincula apenas ao localhost, portanto nada é exposto a menos que você configure explicitamente um túnel.
 
 ### Channel allowlists (deny-by-default)
 
-Inbound sender policy is now consistent:
+Inbound sender policy agora está consistente:
 
 - Empty allowlist = **deny all inbound messages**
 - `"*"` = **allow all** (explicit opt-in)
 - Otherwise = exact-match allowlist
 
-This keeps accidental exposure low by default.
+Isso mantém a exposição acidental baixa por padrão.
 
-Full channel configuration reference: [docs/channels-reference.md](docs/channels-reference.md).
+Referência completa de configuração de canais: [docs/channels-reference.md](docs/channels-reference.md).
 
 Recommended low-friction setup (secure + fast):
 
@@ -500,24 +497,24 @@ Recommended low-friction setup (secure + fast):
 Telegram operator-approval flow:
 
 1. Keep `[channels_config.telegram].allowed_users = []` for deny-by-default startup.
-2. Unauthorized users receive a hint with a copyable operator command:
+2. Usuários não autorizados recebem uma dica com um comando do operador copiável:
    `zeroclaw channel bind-telegram <IDENTITY>`.
-3. Operator runs that command locally, then user retries sending a message.
+3. O operador executa esse comando localmente, e então o usuário tenta enviar a mensagem novamente.
 
-If you need a one-shot manual approval, run:
+Se você precisar de uma aprovação manual única, execute:
 
 ```bash
 zeroclaw channel bind-telegram 123456789
 ```
 
-If you're not sure which identity to use:
+Se você não tiver certeza de qual identidade usar:
 
-1. Start channels and send one message to your bot.
-2. Read the warning log to see the exact sender identity.
-3. Add that value to the allowlist and rerun channels-only setup.
+1. Inicie os canais e envie uma mensagem para o seu bot.
+2. Leia o log de aviso para ver a identidade exata do remetente.
+3. Adicione esse valor à lista de permissões e execute novamente a configuração apenas dos canais.
 
-If you hit authorization warnings in logs (for example: `ignoring message from unauthorized user`),
-rerun channel setup only:
+Se você encontrar avisos de autorização nos logs (por exemplo: `ignoring message from unauthorized user`),
+execute novamente apenas a configuração dos canais:
 
 ```bash
 zeroclaw onboard --channels-only
@@ -525,10 +522,10 @@ zeroclaw onboard --channels-only
 
 ### Telegram media replies
 
-Telegram routing now replies to the source **chat ID** from incoming updates (instead of usernames),
-which avoids `Bad Request: chat not found` failures.
+O roteamento do Telegram agora responde ao ID do chat de origem das atualizações recebidas (em vez de nomes de usuário),
+o que evita falhas do tipo `Bad Request: chat not found`.
 
-For non-text replies, ZeroClaw can send Telegram attachments when the assistant includes markers:
+Para respostas que não sejam texto, o ZeroClaw pode enviar anexos no Telegram quando o assistente incluir marcadores:
 
 - `[IMAGE:<path-or-url>]`
 - `[DOCUMENT:<path-or-url>]`
@@ -540,12 +537,12 @@ Paths can be local files (for example `/tmp/screenshot.png`) or HTTPS URLs.
 
 ### WhatsApp Setup
 
-ZeroClaw supports two WhatsApp backends:
+O ZeroClaw suporta dois backends do WhatsApp:
 
 - **WhatsApp Web mode** (QR / pair code, no Meta Business API required)
 - **WhatsApp Business Cloud API mode** (official Meta webhook flow)
 
-#### WhatsApp Web mode (recommended for personal/self-hosted use)
+#### WhatsApp Web mode (recomendado para uso pessoal/auto-hospedado)
 
 1. **Build with WhatsApp Web support:**
    ```bash
@@ -570,7 +567,7 @@ ZeroClaw supports two WhatsApp backends:
 
 #### WhatsApp Business Cloud API mode
 
-WhatsApp uses Meta's Cloud API with webhooks (push-based, not polling):
+O WhatsApp utiliza a Cloud API da Meta com webhooks (baseado em push, não em polling):
 
 1. **Create a Meta Business App:**
    - Go to [developers.facebook.com](https://developers.facebook.com)
@@ -595,7 +592,7 @@ WhatsApp uses Meta's Cloud API with webhooks (push-based, not polling):
    ```bash
    zeroclaw gateway --port 3000
    ```
-   WhatsApp requires HTTPS, so use a tunnel (ngrok, Cloudflare, Tailscale Funnel).
+   O WhatsApp requer HTTPS, portanto use um túnel (ngrok, Cloudflare, Tailscale Funnel).
 
 5. **Configure Meta webhook:**
    - In Meta Developer Console → WhatsApp → Configuration → Webhook
@@ -603,11 +600,11 @@ WhatsApp uses Meta's Cloud API with webhooks (push-based, not polling):
    - **Verify Token:** Same as your `verify_token` in config
    - Subscribe to `messages` field
 
-6. **Test:** Send a message to your WhatsApp Business number — ZeroClaw will respond via the LLM.
+6. **Test:** Envie uma mensagem para o seu número do WhatsApp Business — o ZeroClaw responderá via LLM.
 
 ### Security Analysis (2026-02-22)
 
-Full source-code audit of all 31 tool surfaces. Grades reflect the current state of defense-in-depth verified against the implementation.
+Auditoria completa do código-fonte de todas as 31 superfícies de ferramentas. As notas refletem o estado atual da defesa em profundidade, verificadas em relação à implementação.
 
 **Grade scale:** A = strong controls, well-tested · B = adequate controls, gaps identified · C = significant gaps · D = critical issues present
 
@@ -700,7 +697,7 @@ Full source-code audit of all 31 tool surfaces. Grades reflect the current state
 | Compiler hygiene | `src/security/`, `src/tools/` | **B+** |
 | **Repository overall** | 31 surfaces audited | **B+** |
 
-> Full security model and configuration reference: [docs/security/README.md](docs/security/README.md)
+> Modelo completo de segurança e referência de configuração: [docs/security/README.md](docs/security/README.md)
 
 ## Configuration
 
@@ -819,7 +816,7 @@ format = "openclaw"            # "openclaw" (default, markdown files) or "aieos"
 
 ### Ollama Local and Remote Endpoints
 
-ZeroClaw uses one provider key (`ollama`) for both local and remote Ollama deployments:
+O ZeroClaw utiliza uma única chave de provedor (`ollama`) para implantações Ollama locais e remotas:
 
 - Local Ollama: keep `api_url` unset, run `ollama serve`, and use models like `llama3.2`.
 - Remote Ollama endpoint (including Ollama Cloud): set `api_url` to the remote endpoint and set `api_key` (or `OLLAMA_API_KEY`) when required.
@@ -836,7 +833,7 @@ api_key = "ollama_api_key_here"
 
 ### llama.cpp Server Endpoint
 
-ZeroClaw now supports `llama-server` as a first-class local provider:
+O ZeroClaw agora suporta o `llama-server` como provedor local de primeira classe
 
 - Provider ID: `llamacpp` (alias: `llama.cpp`)
 - Default endpoint: `http://localhost:8080/v1`
@@ -906,7 +903,7 @@ Traditional markdown files in your workspace:
 
 ### AIEOS (AI Entity Object Specification)
 
-[AIEOS](https://aieos.org) is a standardization framework for portable AI identity. ZeroClaw supports AIEOS v1.1 JSON payloads, allowing you to:
+[AIEOS](https://aieos.org) é uma estrutura de padronização para identidade de IA portátil. O ZeroClaw suporta payloads JSON AIEOS v1.1, permitindo que você:
 
 - **Import identities** from the AIEOS ecosystem
 - **Export identities** to other AIEOS-compatible systems
@@ -968,7 +965,7 @@ aieos_inline = '''
 '''
 ```
 
-ZeroClaw accepts both canonical AIEOS generator payloads and compact legacy payloads, then normalizes them into one system prompt format.
+O ZeroClaw aceita tanto os payloads canônicos do gerador AIEOS quanto os payloads legados compactos, e em seguida os normaliza em um único formato de prompt do sistema.
 
 #### AIEOS Schema Sections
 
@@ -1098,7 +1095,7 @@ git push --no-verify
 
 ## Collaboration & Docs
 
-Start from the docs hub for a task-based map:
+Comece pelo hub de documentação para um mapa baseado em tarefas:
 
 - Documentation hub: [`docs/README.md`](docs/README.md)
 - Unified docs TOC: [`docs/SUMMARY.md`](docs/SUMMARY.md)
@@ -1111,7 +1108,7 @@ Start from the docs hub for a task-based map:
 - Docs inventory/classification: [`docs/docs-inventory.md`](docs/docs-inventory.md)
 - PR/Issue triage snapshot (as of February 18, 2026): [`docs/project-triage-snapshot-2026-02-18.md`](docs/project-triage-snapshot-2026-02-18.md)
 
-Core collaboration references:
+Referências principais de colaboração:
 
 - Documentation hub: [docs/README.md](docs/README.md)
 - Documentation template: [docs/doc-template.md](docs/doc-template.md)
@@ -1124,42 +1121,42 @@ Core collaboration references:
 - CI ownership and triage map: [docs/ci-map.md](docs/ci-map.md)
 - Security disclosure policy: [SECURITY.md](SECURITY.md)
 
-For deployment and runtime operations:
+Para implantação e operações em tempo de execução:
 
 - Network deployment guide: [docs/network-deployment.md](docs/network-deployment.md)
 - Proxy agent playbook: [docs/proxy-agent-playbook.md](docs/proxy-agent-playbook.md)
 
 ## Support ZeroClaw
 
-If ZeroClaw helps your work and you want to support ongoing development, you can donate here:
+Se o ZeroClaw ajuda no seu trabalho e você quer apoiar o desenvolvimento contínuo, você pode doar aqui:
 
 <a href="https://buymeacoffee.com/argenistherose"><img src="https://img.shields.io/badge/Buy%20Me%20a%20Coffee-Donate-yellow.svg?style=for-the-badge&logo=buy-me-a-coffee" alt="Buy Me a Coffee" /></a>
 
 ### 🙏 Special Thanks
 
-A heartfelt thank you to the communities and institutions that inspire and fuel this open-source work:
+Um sincero agradecimento às comunidades e instituições que inspiram e impulsionam este trabalho de código aberto:
 
-- **Harvard University** — for fostering intellectual curiosity and pushing the boundaries of what's possible.
-- **MIT** — for championing open knowledge, open source, and the belief that technology should be accessible to everyone.
-- **Sundai Club** — for the community, the energy, and the relentless drive to build things that matter.
-- **The World & Beyond** 🌍✨ — to every contributor, dreamer, and builder out there making open source a force for good. This is for you.
+- **Harvard University** — Por fomentar a curiosidade intelectual e expandir os limites do que é possível.
+- **MIT** — Por defender o conhecimento aberto, o código aberto e a crença de que a tecnologia deve ser acessível a todos.
+- **Sundai Club** — Pela comunidade, pela energia e pela determinação incansável de criar coisas que importam.
+- **The World & Beyond** 🌍✨ — Para todos os colaboradores, sonhadores e construtores que tornam o código aberto uma força para o bem. Isto é para vocês.
 
-We're building in the open because the best ideas come from everywhere. If you're reading this, you're part of it. Welcome. 🦀❤️
+Estamos desenvolvendo de forma aberta porque as melhores ideias vêm de todos os lugares. Se você está lendo isto, você faz parte disso. Seja bem-vindo. 🦀❤️
 
 ## ⚠️ Official Repository & Impersonation Warning
 
-**This is the only official ZeroClaw repository:**
+**Este é o único repositório oficial do ZeroClaw:**
 > https://github.com/openagen/zeroclaw
 
-Any other repository, organization, domain, or package claiming to be "ZeroClaw" or implying affiliation with ZeroClaw Labs is **unauthorized and not affiliated with this project**. Known unauthorized forks will be listed in [TRADEMARK.md](TRADEMARK.md).
+Qualquer outro repositório, organização, domínio ou pacote que se declare "ZeroClaw" ou sugira afiliação com a ZeroClaw Labs é **unauthorized and not affiliated with this project**. Forks não autorizados conhecidos serão listados em [TRADEMARK.md](TRADEMARK.md).
 
-If you encounter impersonation or trademark misuse, please [open an issue](https://github.com/openagen/zeroclaw/issues).
+Se você encontrar casos de personificação ou uso indevido de marca registrada, por favor [open an issue](https://github.com/openagen/zeroclaw/issues).
 
 ---
 
 ## License
 
-ZeroClaw is dual-licensed for maximum openness and contributor protection:
+O ZeroClaw possui dupla licença para máxima abertura e proteção dos colaboradores:
 
 | License | Use case |
 |---|---|
@@ -1170,14 +1167,15 @@ You may choose either license. **Contributors automatically grant rights under b
 
 ### Trademark
 
-The **ZeroClaw** name and logo are trademarks of ZeroClaw Labs. This license does not grant permission to use them to imply endorsement or affiliation. See [TRADEMARK.md](TRADEMARK.md) for permitted and prohibited uses.
+O nome e o logotipo **ZeroClaw** são marcas registradas da ZeroClaw Labs. Esta licença não concede permissão para usá-los de forma a sugerir endosso ou afiliação. Consulte [TRADEMARK.md](TRADEMARK.md) para usos permitidos e proibidos.
+
 
 ### Contributor Protections
 
 - You **retain copyright** of your contributions
 - **Patent grant** (Apache 2.0) shields you from patent claims by other contributors
 - Your contributions are **permanently attributed** in commit history and [NOTICE](NOTICE)
-- No trademark rights are transferred by contributing
+- Nenhum direito de marca registrada é transferido ao contribuir
 
 ## Contributing
 
@@ -1195,7 +1193,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) and [CLA.md](CLA.md). Implement a trait, 
 
 **ZeroClaw** — Zero overhead. Zero compromise. Deploy anywhere. Swap anything. 🦀
 
-## Star History
+## Histórico de estrelas
 
 <p align="center">
   <a href="https://www.star-history.com/#openagen/zeroclaw&type=date&legend=top-left">

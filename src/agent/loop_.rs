@@ -236,10 +236,10 @@ async fn build_context(mem: &dyn Memory, user_msg: &str, min_relevance_score: f6
                 }
                 let _ = writeln!(context, "- {}: {}", entry.key, entry.content);
             }
-            if context != "[Memory context]\n" {
-                context.push('\n');
-            } else {
+            if context == "[Memory context]\n" {
                 context.clear();
+            } else {
+                context.push('\n');
             }
         }
     }
@@ -382,11 +382,34 @@ fn is_xml_meta_tag(tag: &str) -> bool {
     )
 }
 
-static XML_TOOL_TAG_RE: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"(?s)<([a-zA-Z_][a-zA-Z0-9_-]*)>\s*(.*?)\s*</\1>").unwrap());
+static XML_OPEN_TAG_RE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"<([a-zA-Z_][a-zA-Z0-9_-]*)>").unwrap());
 
-static XML_ARG_TAG_RE: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"(?s)<([a-zA-Z_][a-zA-Z0-9_-]*)>\s*([^<]+?)\s*</\1>").unwrap());
+static XML_ARG_TAG_RE: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"(?s)<([a-zA-Z_][a-zA-Z0-9_-]*)>\s*([^<]+?)\s*</[a-zA-Z_][a-zA-Z0-9_-]*>").unwrap()
+});
+
+/// Iterate over `<tag_name>content</tag_name>` pairs in `text`.
+/// Uses a manual closing-tag search to correctly handle nested argument tags
+/// without requiring regex backreferences (unsupported by the `regex` crate).
+fn iter_xml_tagged_sections(text: &str) -> impl Iterator<Item = (&str, &str)> {
+    let mut pos = 0usize;
+    std::iter::from_fn(move || loop {
+        let cap = XML_OPEN_TAG_RE.captures(&text[pos..])?;
+        let m = cap.get(0).unwrap();
+        let name = cap.get(1).unwrap().as_str();
+        let name_start = pos + m.start();
+        let content_start = pos + m.end();
+        let close_tag = format!("</{name}>");
+        if let Some(rel) = text[content_start..].find(close_tag.as_str()) {
+            let content = text[content_start..content_start + rel].trim();
+            pos = content_start + rel + close_tag.len();
+            return Some((name, content));
+        }
+        // No matching closing tag; advance past this opening tag and keep looking.
+        pos = name_start + m.len();
+    })
+}
 
 /// Parse XML-style tool calls in `<tool_call>` bodies.
 /// Supports both nested argument tags and JSON argument payloads:
@@ -400,13 +423,11 @@ fn parse_xml_tool_calls(xml_content: &str) -> Option<Vec<ParsedToolCall>> {
         return None;
     }
 
-    for cap in XML_TOOL_TAG_RE.captures_iter(trimmed) {
-        let tool_name = cap[1].trim().to_string();
-        if is_xml_meta_tag(&tool_name) {
+    for (tool_name, inner_content) in iter_xml_tagged_sections(trimmed) {
+        if is_xml_meta_tag(tool_name) {
             continue;
         }
 
-        let inner_content = cap[2].trim();
         if inner_content.is_empty() {
             continue;
         }
@@ -443,7 +464,7 @@ fn parse_xml_tool_calls(xml_content: &str) -> Option<Vec<ParsedToolCall>> {
         }
 
         calls.push(ParsedToolCall {
-            name: tool_name,
+            name: tool_name.to_string(),
             arguments: serde_json::Value::Object(args),
         });
     }
@@ -1083,7 +1104,7 @@ async fn execute_tools_parallel(
         })
         .collect();
 
-    let results = futures::future::join_all(futures).await;
+    let results = futures_util::future::join_all(futures).await;
     results.into_iter().collect()
 }
 
@@ -3608,6 +3629,7 @@ Let me check the result."#;
             None, // no identity config
             None, // no bootstrap_max_chars
             true, // native_tools
+            crate::config::SkillsPromptInjectionMode::Full,
         );
 
         // Must contain zero XML protocol artifacts

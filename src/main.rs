@@ -805,8 +805,7 @@ async fn main() -> Result<()> {
     config.apply_env_overrides();
 
     match cli.command {
-        Commands::Onboard { .. } => unreachable!(),
-        Commands::Completions { .. } => unreachable!(),
+        Commands::Onboard { .. } | Commands::Completions { .. } => unreachable!(),
 
         Commands::Agent {
             message,

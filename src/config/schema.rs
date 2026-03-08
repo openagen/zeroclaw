@@ -363,7 +363,7 @@ fn parse_skills_prompt_injection_mode(raw: &str) -> Option<SkillsPromptInjection
 }
 
 /// Skills loading configuration (`[skills]` section).
-#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize, JsonSchema)]
 pub struct SkillsConfig {
     /// Enable loading and syncing the community open-skills repository.
     /// Default: `false` (opt-in).
@@ -377,16 +377,6 @@ pub struct SkillsConfig {
     /// `full` preserves legacy behavior. `compact` keeps context small and loads skills on demand.
     #[serde(default)]
     pub prompt_injection_mode: SkillsPromptInjectionMode,
-}
-
-impl Default for SkillsConfig {
-    fn default() -> Self {
-        Self {
-            open_skills_enabled: false,
-            open_skills_dir: None,
-            prompt_injection_mode: SkillsPromptInjectionMode::default(),
-        }
-    }
 }
 
 /// Multimodal (image) handling configuration (`[multimodal]` section).
@@ -3732,7 +3722,7 @@ async fn sync_directory(path: &Path) -> Result<()> {
         dir.sync_all()
             .await
             .with_context(|| format!("Failed to fsync directory metadata: {}", path.display()))?;
-        return Ok(());
+        Ok(())
     }
 
     #[cfg(not(unix))]
