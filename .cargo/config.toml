@@ -2,4 +2,8 @@
 rustflags = ["-C", "link-arg=-static"]
 
 [target.aarch64-unknown-linux-musl]
+linker = "aarch64-linux-musl-gcc"
 rustflags = ["-C", "link-arg=-static"]
+
+[target.aarch64-unknown-linux-gnu]
+linker = "aarch64-linux-gnu-gcc"

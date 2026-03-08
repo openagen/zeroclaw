@@ -122,6 +122,15 @@ pub async fn handle_command(cmd: crate::PeripheralCommands, config: &Config) -> 
             println!("Build with: cargo build --features hardware");
         }
         #[cfg(feature = "hardware")]
+        crate::PeripheralCommands::DeployUnoQ { host } => {
+            uno_q_setup::deploy_uno_q(&host)?;
+        }
+        #[cfg(not(feature = "hardware"))]
+        crate::PeripheralCommands::DeployUnoQ { .. } => {
+            println!("Uno Q deploy requires the 'hardware' feature.");
+            println!("Build with: cargo build --features hardware");
+        }
+        #[cfg(feature = "hardware")]
         crate::PeripheralCommands::FlashNucleo => {
             nucleo_flash::flash_nucleo_firmware()?;
         }
@@ -149,9 +158,22 @@ pub async fn create_peripheral_tools(config: &PeripheralsConfig) -> Result<Vec<B
         // Arduino Uno Q: Bridge transport (socket to local Bridge app)
         if board.transport == "bridge" && (board.board == "arduino-uno-q" || board.board == "uno-q")
         {
+            // MCU tools (via Bridge socket)
             tools.push(Box::new(uno_q_bridge::UnoQGpioReadTool));
             tools.push(Box::new(uno_q_bridge::UnoQGpioWriteTool));
-            tracing::info!(board = %board.board, "Uno Q Bridge GPIO tools added");
+            tools.push(Box::new(uno_q_bridge::UnoQAdcReadTool));
+            tools.push(Box::new(uno_q_bridge::UnoQPwmWriteTool));
+            tools.push(Box::new(uno_q_bridge::UnoQI2cScanTool));
+            tools.push(Box::new(uno_q_bridge::UnoQI2cTransferTool));
+            tools.push(Box::new(uno_q_bridge::UnoQSpiTransferTool));
+            tools.push(Box::new(uno_q_bridge::UnoQCanSendTool));
+            tools.push(Box::new(uno_q_bridge::UnoQLedMatrixTool));
+            tools.push(Box::new(uno_q_bridge::UnoQRgbLedTool));
+            // Linux tools (direct MPU access)
+            tools.push(Box::new(uno_q_bridge::UnoQCameraCaptureTool));
+            tools.push(Box::new(uno_q_bridge::UnoQLinuxRgbLedTool));
+            tools.push(Box::new(uno_q_bridge::UnoQSystemInfoTool));
+            tracing::info!(board = %board.board, "Uno Q Bridge full peripheral tools added (13 tools)");
             continue;
         }
 

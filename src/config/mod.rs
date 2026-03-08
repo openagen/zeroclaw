@@ -8,7 +8,7 @@ pub use schema::{
     ChannelsConfig, ClassificationRule, ComposioConfig, Config, CostConfig, CronConfig,
     DelegateAgentConfig, DiscordConfig, DockerRuntimeConfig, EmbeddingRouteConfig, GatewayConfig,
     HardwareConfig, HardwareTransport, HeartbeatConfig, HttpRequestConfig, IMessageConfig,
-    IdentityConfig, LarkConfig, MatrixConfig, MemoryConfig, ModelRouteConfig, MultimodalConfig,
+    IdentityConfig, LarkConfig, MatrixConfig, MemoryConfig, ModelRouteConfig, MultimodalConfig, FtmsConfig,
     NextcloudTalkConfig, ObservabilityConfig, PeripheralBoardConfig, PeripheralsConfig,
     ProxyConfig, ProxyScope, QueryClassificationConfig, ReliabilityConfig, ResourceLimitsConfig,
     RuntimeConfig, SandboxBackend, SandboxConfig, SchedulerConfig, SecretsConfig, SecurityConfig,

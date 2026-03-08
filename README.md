@@ -58,7 +58,6 @@ Use this board for important notices (breaking changes, security advisories, mai
 
 | Date (UTC) | Level | Notice | Action |
 |---|---|---|---|
-| 2026-02-19 | _Critical_ | We are **not affiliated** with `openagen/zeroclaw` or `zeroclaw.org`. The `zeroclaw.org` domain currently points to the `openagen/zeroclaw` fork, and that domain/repository are impersonating our official website/project. | Do not trust information, binaries, fundraising, or announcements from those sources. Use only this repository and our verified social accounts. |
 | 2026-02-19 | _Important_ | We have **not** launched an official website yet, and we are seeing impersonation attempts. Do **not** join any investment or fundraising activity claiming the ZeroClaw name. | Use this repository as the single source of truth. Follow [X (@zeroclawlabs)](https://x.com/zeroclawlabs?s=21), [Reddit (r/zeroclawlabs)](https://www.reddit.com/r/zeroclawlabs/), [Telegram (@zeroclawlabs)](https://t.me/zeroclawlabs), [Telegram CN (@zeroclawlabs_cn)](https://t.me/zeroclawlabs_cn), [Telegram RU (@zeroclawlabs_ru)](https://t.me/zeroclawlabs_ru), and [Xiaohongshu](https://www.xiaohongshu.com/user/profile/67cbfc43000000000d008307?xsec_token=AB73VnYnGNx5y36EtnnZfGmAmS-6Wzv8WMuGpfwfkg6Yc%3D&xsec_source=pc_search) for official updates. |
 | 2026-02-19 | _Important_ | Anthropic updated the Authentication and Credential Use terms on 2026-02-19. OAuth authentication (Free, Pro, Max) is intended exclusively for Claude Code and Claude.ai; using OAuth tokens from Claude Free/Pro/Max in any other product, tool, or service (including Agent SDK) is not permitted and may violate the Consumer Terms of Service. | Please temporarily avoid Claude Code OAuth integrations to prevent potential loss. Original clause: [Authentication and Credential Use](https://code.claude.com/docs/en/legal-and-compliance#authentication-and-credential-use). |
 
@@ -170,7 +169,7 @@ Example sample (macOS arm64, measured on February 18, 2026):
 Or skip the steps above and install everything (system deps, Rust, ZeroClaw) in a single command:
 
 ```bash
-curl -LsSf https://raw.githubusercontent.com/zeroclaw-labs/zeroclaw/main/scripts/install.sh | bash
+curl -LsSf https://raw.githubusercontent.com/openagen/zeroclaw/main/scripts/install.sh | bash
 ```
 
 #### Compilation resource requirements
@@ -215,7 +214,7 @@ brew install zeroclaw
 
 ```bash
 # Recommended: clone then run local bootstrap script
-git clone https://github.com/zeroclaw-labs/zeroclaw.git
+git clone https://github.com/openagen/zeroclaw.git
 cd zeroclaw
 ./bootstrap.sh
 
@@ -244,7 +243,7 @@ ZEROCLAW_CONTAINER_CLI=podman ./bootstrap.sh --docker
 Remote one-liner (review first in security-sensitive environments):
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/zeroclaw-labs/zeroclaw/main/scripts/bootstrap.sh | bash
+curl -fsSL https://raw.githubusercontent.com/openagen/zeroclaw/main/scripts/bootstrap.sh | bash
 ```
 
 Details: [`docs/one-click-bootstrap.md`](docs/one-click-bootstrap.md) (toolchain mode may request `sudo` for system packages).
@@ -258,18 +257,18 @@ Release assets are published for:
 - Windows: `x86_64`
 
 Download the latest assets from:
-<https://github.com/zeroclaw-labs/zeroclaw/releases/latest>
+<https://github.com/openagen/zeroclaw/releases/latest>
 
 Example (ARM64 Linux):
 
 ```bash
-curl -fsSLO https://github.com/zeroclaw-labs/zeroclaw/releases/latest/download/zeroclaw-aarch64-unknown-linux-gnu.tar.gz
+curl -fsSLO https://github.com/openagen/zeroclaw/releases/latest/download/zeroclaw-aarch64-unknown-linux-gnu.tar.gz
 tar xzf zeroclaw-aarch64-unknown-linux-gnu.tar.gz
 install -m 0755 zeroclaw "$HOME/.cargo/bin/zeroclaw"
 ```
 
 ```bash
-git clone https://github.com/zeroclaw-labs/zeroclaw.git
+git clone https://github.com/openagen/zeroclaw.git
 cd zeroclaw
 cargo build --release --locked
 cargo install --path . --force --locked
@@ -1053,11 +1052,11 @@ We're building in the open because the best ideas come from everywhere. If you'r
 ## ⚠️ Official Repository & Impersonation Warning
 
 **This is the only official ZeroClaw repository:**
-> https://github.com/zeroclaw-labs/zeroclaw
+> https://github.com/openagen/zeroclaw
 
 Any other repository, organization, domain, or package claiming to be "ZeroClaw" or implying affiliation with ZeroClaw Labs is **unauthorized and not affiliated with this project**. Known unauthorized forks will be listed in [TRADEMARK.md](TRADEMARK.md).
 
-If you encounter impersonation or trademark misuse, please [open an issue](https://github.com/zeroclaw-labs/zeroclaw/issues).
+If you encounter impersonation or trademark misuse, please [open an issue](https://github.com/openagen/zeroclaw/issues).
 
 ---
 
@@ -1102,11 +1101,11 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) and [CLA.md](CLA.md). Implement a trait, 
 ## Star History
 
 <p align="center">
-  <a href="https://www.star-history.com/#zeroclaw-labs/zeroclaw&type=date&legend=top-left">
+  <a href="https://www.star-history.com/#openagen/zeroclaw&type=date&legend=top-left">
     <picture>
-     <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=zeroclaw-labs/zeroclaw&type=date&theme=dark&legend=top-left" />
-     <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=zeroclaw-labs/zeroclaw&type=date&legend=top-left" />
-     <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=zeroclaw-labs/zeroclaw&type=date&legend=top-left" />
+     <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=openagen/zeroclaw&type=date&theme=dark&legend=top-left" />
+     <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=openagen/zeroclaw&type=date&legend=top-left" />
+     <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=openagen/zeroclaw&type=date&legend=top-left" />
     </picture>
   </a>
 </p>

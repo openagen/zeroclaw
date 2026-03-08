@@ -2589,7 +2589,7 @@ pub async fn start_channels(config: Config) -> Result<()> {
     };
     // Build system prompt from workspace identity files + skills
     let workspace = config.workspace_dir.clone();
-    let tools_registry = Arc::new(tools::all_tools_with_runtime(
+    let mut all_tools = tools::all_tools_with_runtime(
         Arc::new(config.clone()),
         &security,
         runtime,
@@ -2602,7 +2602,17 @@ pub async fn start_channels(config: Config) -> Result<()> {
         &config.agents,
         config.api_key.as_deref(),
         &config,
-    ));
+    );
+
+    // Merge peripheral tools (UNO Q Bridge, RPi GPIO, etc.)
+    let peripheral_tools =
+        crate::peripherals::create_peripheral_tools(&config.peripherals).await?;
+    if !peripheral_tools.is_empty() {
+        tracing::info!(count = peripheral_tools.len(), "Peripheral tools added to channel server");
+        all_tools.extend(peripheral_tools);
+    }
+
+    let tools_registry = Arc::new(all_tools);
 
     let skills = crate::skills::load_skills_with_config(&workspace, &config);
 

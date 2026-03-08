@@ -19,7 +19,7 @@ use crate::util::truncate_with_ellipsis;
 use anyhow::{Context, Result};
 use axum::{
     body::Bytes,
-    extract::{ConnectInfo, Query, State},
+    extract::{ConnectInfo, Multipart, Path as AxumPath, Query, State},
     http::{header, HeaderMap, StatusCode},
     response::{IntoResponse, Json},
     routing::{get, post},
@@ -290,6 +290,8 @@ pub struct AppState {
     pub nextcloud_talk_webhook_secret: Option<Arc<str>>,
     /// Observability backend for metrics scraping
     pub observer: Arc<dyn crate::observability::Observer>,
+    /// FTMS (File/Text Management System) service
+    pub ftms: Option<Arc<crate::ftms::FtmsService>>,
 }
 
 /// Run the HTTP gateway using axum with proper HTTP/1.1 compliance.
@@ -493,6 +495,22 @@ pub async fn run_gateway(host: &str, port: u16, config: Config) -> Result<()> {
         idempotency_max_keys,
     ));
 
+    // ── FTMS ──────────────────────────────────────────────────
+    let ftms = if config.ftms.enabled {
+        match crate::ftms::FtmsService::new(&config.ftms.storage_dir, &config.workspace_dir) {
+            Ok(svc) => {
+                tracing::info!("FTMS enabled, storage: {}", config.ftms.storage_dir);
+                Some(Arc::new(svc))
+            }
+            Err(e) => {
+                tracing::error!("FTMS init failed: {e}");
+                None
+            }
+        }
+    } else {
+        None
+    };
+
     // ── Tunnel ────────────────────────────────────────────────
     let tunnel = crate::tunnel::create_tunnel(&config.tunnel)?;
     let mut tunnel_url: Option<String> = None;
@@ -526,6 +544,11 @@ pub async fn run_gateway(host: &str, port: u16, config: Config) -> Result<()> {
     }
     if nextcloud_talk_channel.is_some() {
         println!("  POST /nextcloud-talk — Nextcloud Talk bot webhook");
+    }
+    if ftms.is_some() {
+        println!("  POST /upload    — FTMS file upload (multipart)");
+        println!("  GET  /files     — list uploaded files");
+        println!("  GET  /files/search?q= — full-text search");
     }
     println!("  GET  /health    — health check");
     println!("  GET  /metrics   — Prometheus metrics");
@@ -568,7 +591,15 @@ pub async fn run_gateway(host: &str, port: u16, config: Config) -> Result<()> {
         nextcloud_talk: nextcloud_talk_channel,
         nextcloud_talk_webhook_secret,
         observer,
+        ftms,
     };
+
+    // Build FTMS upload router with higher body limit
+    let upload_limit = config.ftms.max_upload_size_mb * 1024 * 1024;
+    let upload_router = Router::new()
+        .route("/upload", post(handle_ftms_upload))
+        .layer(RequestBodyLimitLayer::new(upload_limit))
+        .with_state(state.clone());
 
     // Build router with middleware
     let app = Router::new()
@@ -580,12 +611,19 @@ pub async fn run_gateway(host: &str, port: u16, config: Config) -> Result<()> {
         .route("/whatsapp", post(handle_whatsapp_message))
         .route("/linq", post(handle_linq_webhook))
         .route("/nextcloud-talk", post(handle_nextcloud_talk_webhook))
+        .route("/files", get(handle_ftms_list))
+        .route("/files/search", get(handle_ftms_search))
+        .route("/files/{id}", get(handle_ftms_get))
+        .route("/files/{id}/download", get(handle_ftms_download))
         .with_state(state)
         .layer(RequestBodyLimitLayer::new(MAX_BODY_SIZE))
         .layer(TimeoutLayer::with_status_code(
             StatusCode::REQUEST_TIMEOUT,
             Duration::from_secs(REQUEST_TIMEOUT_SECS),
         ));
+
+    // Merge FTMS upload router (its own body limit) with main router
+    let app = upload_router.merge(app);
 
     // Run the server
     axum::serve(
@@ -1335,6 +1373,287 @@ async fn handle_nextcloud_talk_webhook(
     (StatusCode::OK, Json(serde_json::json!({"status": "ok"})))
 }
 
+
+
+// ══════════════════════════════════════════════════════════════════════════════
+// FTMS HANDLERS
+// ══════════════════════════════════════════════════════════════════════════════
+
+fn check_bearer_auth(state: &AppState, headers: &HeaderMap) -> bool {
+    if !state.pairing.require_pairing() {
+        return true;
+    }
+    let auth = headers
+        .get(header::AUTHORIZATION)
+        .and_then(|v| v.to_str().ok())
+        .unwrap_or("");
+    let token = auth.strip_prefix("Bearer ").unwrap_or("");
+    state.pairing.is_authenticated(token)
+}
+
+async fn handle_ftms_upload(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    mut multipart: Multipart,
+) -> impl IntoResponse {
+    if !check_bearer_auth(&state, &headers) {
+        return (
+            StatusCode::UNAUTHORIZED,
+            Json(serde_json::json!({"error": "Unauthorized"})),
+        )
+            .into_response();
+    }
+
+    let ftms = match &state.ftms {
+        Some(f) => f,
+        None => {
+            return (
+                StatusCode::SERVICE_UNAVAILABLE,
+                Json(serde_json::json!({"error": "FTMS not enabled"})),
+            )
+                .into_response()
+        }
+    };
+
+    let mut file_data: Option<(String, Vec<u8>)> = None;
+    let mut session_id: Option<String> = None;
+    let mut channel: Option<String> = None;
+    let mut tags: Option<String> = None;
+
+    while let Ok(Some(field)) = multipart.next_field().await {
+        let name = field.name().unwrap_or("").to_string();
+        match name.as_str() {
+            "file" => {
+                let fname = field.file_name().unwrap_or("upload").to_string();
+                if let Ok(bytes) = field.bytes().await {
+                    file_data = Some((fname, bytes.to_vec()));
+                }
+            }
+            "session_id" => {
+                session_id = field.text().await.ok();
+            }
+            "channel" => {
+                channel = field.text().await.ok();
+            }
+            "tags" => {
+                tags = field.text().await.ok();
+            }
+            _ => {}
+        }
+    }
+
+    let (filename, data) = match file_data {
+        Some(d) => d,
+        None => {
+            return (
+                StatusCode::BAD_REQUEST,
+                Json(serde_json::json!({"error": "No file field in multipart"})),
+            )
+                .into_response()
+        }
+    };
+
+    let metadata = crate::ftms::FileMetadata {
+        session_id,
+        channel,
+        tags,
+    };
+
+    match ftms.upload(&filename, &data, metadata).await {
+        Ok(record) => (StatusCode::OK, Json(serde_json::json!(record))).into_response(),
+        Err(e) => (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(serde_json::json!({"error": e.to_string()})),
+        )
+            .into_response(),
+    }
+}
+
+async fn handle_ftms_list(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Query(params): Query<HashMap<String, String>>,
+) -> impl IntoResponse {
+    if !check_bearer_auth(&state, &headers) {
+        return (
+            StatusCode::UNAUTHORIZED,
+            Json(serde_json::json!({"error": "Unauthorized"})),
+        )
+            .into_response();
+    }
+    let ftms = match &state.ftms {
+        Some(f) => f,
+        None => {
+            return (
+                StatusCode::SERVICE_UNAVAILABLE,
+                Json(serde_json::json!({"error": "FTMS not enabled"})),
+            )
+                .into_response()
+        }
+    };
+    let offset = params
+        .get("offset")
+        .and_then(|v| v.parse().ok())
+        .unwrap_or(0usize);
+    let limit = params
+        .get("limit")
+        .and_then(|v| v.parse().ok())
+        .unwrap_or(20usize);
+    let session_id = params.get("session_id").map(|s| s.as_str());
+    let mime_prefix = params.get("type").map(|s| s.as_str());
+
+    match ftms.index.list(offset, limit, session_id, mime_prefix) {
+        Ok(resp) => (StatusCode::OK, Json(serde_json::json!(resp))).into_response(),
+        Err(e) => (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(serde_json::json!({"error": e.to_string()})),
+        )
+            .into_response(),
+    }
+}
+
+async fn handle_ftms_search(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Query(params): Query<HashMap<String, String>>,
+) -> impl IntoResponse {
+    if !check_bearer_auth(&state, &headers) {
+        return (
+            StatusCode::UNAUTHORIZED,
+            Json(serde_json::json!({"error": "Unauthorized"})),
+        )
+            .into_response();
+    }
+    let ftms = match &state.ftms {
+        Some(f) => f,
+        None => {
+            return (
+                StatusCode::SERVICE_UNAVAILABLE,
+                Json(serde_json::json!({"error": "FTMS not enabled"})),
+            )
+                .into_response()
+        }
+    };
+    let query = match params.get("q") {
+        Some(q) if !q.is_empty() => q.as_str(),
+        _ => {
+            return (
+                StatusCode::BAD_REQUEST,
+                Json(serde_json::json!({"error": "Missing ?q= parameter"})),
+            )
+                .into_response()
+        }
+    };
+    let limit = params
+        .get("limit")
+        .and_then(|v| v.parse().ok())
+        .unwrap_or(20usize);
+
+    match ftms.index.search(query, limit) {
+        Ok(results) => (StatusCode::OK, Json(serde_json::json!(results))).into_response(),
+        Err(e) => (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(serde_json::json!({"error": e.to_string()})),
+        )
+            .into_response(),
+    }
+}
+
+async fn handle_ftms_get(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    AxumPath(id): AxumPath<String>,
+) -> impl IntoResponse {
+    if !check_bearer_auth(&state, &headers) {
+        return (
+            StatusCode::UNAUTHORIZED,
+            Json(serde_json::json!({"error": "Unauthorized"})),
+        )
+            .into_response();
+    }
+    let ftms = match &state.ftms {
+        Some(f) => f,
+        None => {
+            return (
+                StatusCode::SERVICE_UNAVAILABLE,
+                Json(serde_json::json!({"error": "FTMS not enabled"})),
+            )
+                .into_response()
+        }
+    };
+    match ftms.index.get(&id) {
+        Ok(Some(record)) => (StatusCode::OK, Json(serde_json::json!(record))).into_response(),
+        Ok(None) => (
+            StatusCode::NOT_FOUND,
+            Json(serde_json::json!({"error": "File not found"})),
+        )
+            .into_response(),
+        Err(e) => (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(serde_json::json!({"error": e.to_string()})),
+        )
+            .into_response(),
+    }
+}
+
+async fn handle_ftms_download(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    AxumPath(id): AxumPath<String>,
+) -> impl IntoResponse {
+    if !check_bearer_auth(&state, &headers) {
+        return (
+            StatusCode::UNAUTHORIZED,
+            Json(serde_json::json!({"error": "Unauthorized"})),
+        )
+            .into_response();
+    }
+    let ftms = match &state.ftms {
+        Some(f) => f,
+        None => {
+            return (
+                StatusCode::SERVICE_UNAVAILABLE,
+                Json(serde_json::json!({"error": "FTMS not enabled"})),
+            )
+                .into_response()
+        }
+    };
+    let record = match ftms.index.get(&id) {
+        Ok(Some(r)) => r,
+        Ok(None) => {
+            return (
+                StatusCode::NOT_FOUND,
+                Json(serde_json::json!({"error": "File not found"})),
+            )
+                .into_response()
+        }
+        Err(e) => {
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(serde_json::json!({"error": e.to_string()})),
+            )
+                .into_response()
+        }
+    };
+    match ftms.storage.read(&record.file_path).await {
+        Ok(data) => {
+            let headers = [
+                (header::CONTENT_TYPE, record.mime_type),
+                (
+                    header::CONTENT_DISPOSITION,
+                    format!("attachment; filename=\"{}\"", record.filename),
+                ),
+            ];
+            (StatusCode::OK, headers, data).into_response()
+        }
+        Err(e) => (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(serde_json::json!({"error": e.to_string()})),
+        )
+            .into_response(),
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1413,6 +1732,7 @@ mod tests {
             nextcloud_talk: None,
             nextcloud_talk_webhook_secret: None,
             observer: Arc::new(crate::observability::NoopObserver),
+            ftms: None,
         };
 
         let response = handle_metrics(State(state)).await.into_response();
@@ -1458,6 +1778,7 @@ mod tests {
             nextcloud_talk: None,
             nextcloud_talk_webhook_secret: None,
             observer,
+            ftms: None,
         };
 
         let response = handle_metrics(State(state)).await.into_response();
@@ -1820,6 +2141,7 @@ mod tests {
             nextcloud_talk: None,
             nextcloud_talk_webhook_secret: None,
             observer: Arc::new(crate::observability::NoopObserver),
+            ftms: None,
         };
 
         let mut headers = HeaderMap::new();
@@ -1880,6 +2202,7 @@ mod tests {
             nextcloud_talk: None,
             nextcloud_talk_webhook_secret: None,
             observer: Arc::new(crate::observability::NoopObserver),
+            ftms: None,
         };
 
         let headers = HeaderMap::new();
@@ -1952,6 +2275,7 @@ mod tests {
             nextcloud_talk: None,
             nextcloud_talk_webhook_secret: None,
             observer: Arc::new(crate::observability::NoopObserver),
+            ftms: None,
         };
 
         let response = handle_webhook(
@@ -1996,6 +2320,7 @@ mod tests {
             nextcloud_talk: None,
             nextcloud_talk_webhook_secret: None,
             observer: Arc::new(crate::observability::NoopObserver),
+            ftms: None,
         };
 
         let mut headers = HeaderMap::new();
@@ -2045,6 +2370,7 @@ mod tests {
             nextcloud_talk: None,
             nextcloud_talk_webhook_secret: None,
             observer: Arc::new(crate::observability::NoopObserver),
+            ftms: None,
         };
 
         let mut headers = HeaderMap::new();
@@ -2099,6 +2425,7 @@ mod tests {
             nextcloud_talk: None,
             nextcloud_talk_webhook_secret: None,
             observer: Arc::new(crate::observability::NoopObserver),
+            ftms: None,
         };
 
         let response = handle_nextcloud_talk_webhook(
@@ -2149,6 +2476,7 @@ mod tests {
             nextcloud_talk: Some(channel),
             nextcloud_talk_webhook_secret: Some(Arc::from(secret)),
             observer: Arc::new(crate::observability::NoopObserver),
+            ftms: None,
         };
 
         let mut headers = HeaderMap::new();

@@ -159,6 +159,10 @@ pub struct Config {
     #[serde(default)]
     pub multimodal: MultimodalConfig,
 
+    /// FTMS (File/Text Management System) configuration (`[ftms]`).
+    #[serde(default)]
+    pub ftms: FtmsConfig,
+
     /// Web search tool configuration (`[web_search]`).
     #[serde(default)]
     pub web_search: WebSearchConfig,
@@ -426,6 +430,42 @@ impl Default for MultimodalConfig {
             max_images: default_multimodal_max_images(),
             max_image_size_mb: default_multimodal_max_image_size_mb(),
             allow_remote_fetch: false,
+        }
+    }
+}
+
+
+// ── FTMS (File/Text Management System) ──────────────────────────
+
+fn default_ftms_max_upload_size_mb() -> usize { 50 }
+fn default_ftms_storage_dir() -> String { "~/.zeroclaw/files".to_string() }
+
+/// FTMS configuration (`[ftms]` section).
+///
+/// Controls file upload, storage, text extraction, and full-text search.
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+pub struct FtmsConfig {
+    /// Enable the FTMS subsystem. Default: false.
+    #[serde(default)]
+    pub enabled: bool,
+    /// Maximum upload size in megabytes. Default: 50.
+    #[serde(default = "default_ftms_max_upload_size_mb")]
+    pub max_upload_size_mb: usize,
+    /// Base directory for file storage. Default: ~/.zeroclaw/files.
+    #[serde(default = "default_ftms_storage_dir")]
+    pub storage_dir: String,
+    /// Automatically generate AI descriptions for media files. Default: true.
+    #[serde(default = "default_true")]
+    pub auto_describe: bool,
+}
+
+impl Default for FtmsConfig {
+    fn default() -> Self {
+        Self {
+            enabled: false,
+            max_upload_size_mb: 50,
+            storage_dir: default_ftms_storage_dir(),
+            auto_describe: true,
         }
     }
 }
@@ -2841,6 +2881,7 @@ impl Default for Config {
             browser: BrowserConfig::default(),
             http_request: HttpRequestConfig::default(),
             multimodal: MultimodalConfig::default(),
+            ftms: FtmsConfig::default(),
             web_search: WebSearchConfig::default(),
             proxy: ProxyConfig::default(),
             identity: IdentityConfig::default(),

@@ -141,3 +141,64 @@ fn copy_dir(src: &std::path::Path, dst: &std::path::Path) -> Result<()> {
     }
     Ok(())
 }
+
+/// Deploy ZeroClaw binary + config to Arduino Uno Q via SSH/SCP.
+///
+/// Expects a cross-compiled binary at `target/aarch64-unknown-linux-gnu/release/zeroclaw`.
+pub fn deploy_uno_q(host: &str) -> Result<()> {
+    let ssh_target = if host.contains('@') {
+        host.to_string()
+    } else {
+        format!("arduino@{}", host)
+    };
+
+    let binary = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("target")
+        .join("aarch64-unknown-linux-gnu")
+        .join("release")
+        .join("zeroclaw");
+
+    if !binary.exists() {
+        anyhow::bail!(
+            "Cross-compiled binary not found at {}.\nBuild with: ./dev/cross-uno-q.sh",
+            binary.display()
+        );
+    }
+
+    println!("Creating remote directory on {}...", host);
+    let status = Command::new("ssh")
+        .args([&ssh_target, "mkdir", "-p", "~/zeroclaw"])
+        .status()
+        .context("ssh mkdir failed")?;
+    if !status.success() {
+        anyhow::bail!("Failed to create ~/zeroclaw on Uno Q");
+    }
+
+    println!("Copying zeroclaw binary...");
+    let status = Command::new("scp")
+        .args([
+            binary.to_str().unwrap(),
+            &format!("{}:~/zeroclaw/zeroclaw", ssh_target),
+        ])
+        .status()
+        .context("scp binary failed")?;
+    if !status.success() {
+        anyhow::bail!("Failed to copy binary");
+    }
+
+    let status = Command::new("ssh")
+        .args([&ssh_target, "chmod", "+x", "~/zeroclaw/zeroclaw"])
+        .status()
+        .context("ssh chmod failed")?;
+    if !status.success() {
+        anyhow::bail!("Failed to set executable bit");
+    }
+
+    println!();
+    println!("ZeroClaw deployed to Uno Q!");
+    println!("  Binary: ~/zeroclaw/zeroclaw");
+    println!();
+    println!("Start with: ssh {} '~/zeroclaw/zeroclaw agent'", ssh_target);
+
+    Ok(())
+}
